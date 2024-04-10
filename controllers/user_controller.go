@@ -26,7 +26,7 @@ func (controller *UserController) FindUsers(c *gin.Context) {
 
 func (controller *UserController) FindUser(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	user, err := controller.userService.FindOne(id)
+	user, err := controller.userService.FindOneById(id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
 		return

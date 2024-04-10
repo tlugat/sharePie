@@ -6,10 +6,10 @@ import (
 )
 
 type CreateUserInput struct {
-	FirstName string `json:"firstName"`
-	LastName  string `json:"lastName"`
-	Email     string `json:"email"`
-	Password  string `json:"password"`
+	FirstName string `json:"firstName" binding:"required"`
+	LastName  string `json:"lastName" binding:"required"`
+	Email     string `json:"email" binding:"required"`
+	Password  string `json:"password" binding:"required"`
 }
 
 type UpdateUserInput struct {
@@ -19,7 +19,8 @@ type UpdateUserInput struct {
 
 type IUserService interface {
 	Find() ([]models.User, error)
-	FindOne(id int) (models.User, error)
+	FindOneById(id int) (models.User, error)
+	FindOneByEmail(email string) (models.User, error)
 	Create(input CreateUserInput) (models.User, error)
 	Update(id int, input UpdateUserInput) (models.User, error)
 	Delete(id int) error
@@ -37,8 +38,12 @@ func (service *UserService) Find() ([]models.User, error) {
 	return service.Repository.Find()
 }
 
-func (service *UserService) FindOne(id int) (models.User, error) {
-	return service.Repository.FindOne(id)
+func (service *UserService) FindOneById(id int) (models.User, error) {
+	return service.Repository.FindOneById(id)
+}
+
+func (service *UserService) FindOneByEmail(email string) (models.User, error) {
+	return service.Repository.FindOneByEmail(email)
 }
 
 func (service *UserService) Create(input CreateUserInput) (models.User, error) {
@@ -47,7 +52,7 @@ func (service *UserService) Create(input CreateUserInput) (models.User, error) {
 }
 
 func (service *UserService) Update(id int, input UpdateUserInput) (models.User, error) {
-	user, err := service.Repository.FindOne(id)
+	user, err := service.Repository.FindOneById(id)
 
 	if err != nil {
 		return models.User{}, err
