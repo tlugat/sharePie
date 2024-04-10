@@ -12,23 +12,10 @@ import (
 func InitRoutes(db *gorm.DB, route *gin.RouterGroup) {
 	authMiddleware := middlewares.RequireAuth(db)
 
-	BookHandler(db, route, authMiddleware)
 	CategoryHandler(db, route)
 	TagHandler(db, route)
 	UserHandler(db, route)
 	AuthHandler(db, route, authMiddleware)
-}
-
-func BookHandler(db *gorm.DB, route *gin.RouterGroup, middleware gin.HandlerFunc) {
-	bookRepository := repositories.NewBookRepository(db)
-	bookService := services.NewBookService(bookRepository)
-	bookController := controllers.NewBookController(bookService)
-
-	route.GET("/books", middleware, bookController.FindBooks)
-	route.POST("/books", middleware, bookController.CreateBook)
-	route.GET("/books/:id", middleware, bookController.FindBook)
-	route.PATCH("/books/:id", middleware, bookController.UpdateBook)
-	route.DELETE("/books/:id", middleware, bookController.DeleteBook)
 }
 
 func CategoryHandler(db *gorm.DB, route *gin.RouterGroup) {
