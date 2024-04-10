@@ -12,6 +12,7 @@ func InitRoutes(db *gorm.DB, route *gin.RouterGroup) {
 	BookHandler(db, route)
 	CategoryHandler(db, route)
 	TagHandler(db, route)
+	UserHandler(db, route)
 }
 
 func BookHandler(db *gorm.DB, route *gin.RouterGroup) {
@@ -48,4 +49,15 @@ func TagHandler(db *gorm.DB, route *gin.RouterGroup) {
 	route.GET("/tags/:id", tagController.FindTag)
 	route.PATCH("/tags/:id", tagController.UpdateTag)
 	route.DELETE("/tags/:id", tagController.DeleteTag)
+}
+
+func UserHandler(db *gorm.DB, route *gin.RouterGroup) {
+	userRepository := repositories.NewUserRepository(db)
+	userService := services.NewUserService(userRepository)
+	userController := controllers.NewUserController(userService)
+
+	route.GET("/users", userController.FindUsers)
+	route.GET("/users/:id", userController.FindUser)
+	route.PATCH("/users/:id", userController.UpdateUser)
+	route.DELETE("/users/:id", userController.DeleteUser)
 }
