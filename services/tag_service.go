@@ -6,7 +6,7 @@ import (
 )
 
 type CreateTagInput struct {
-	Name string `json:"title" binding:"required"`
+	Name string `json:"name" binding:"required"`
 }
 
 type UpdateTagInput struct {
