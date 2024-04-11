@@ -7,10 +7,10 @@ import (
 
 type ITagRepository interface {
 	Find() ([]models.Tag, error)
-	FindOne(id int) (models.Tag, error)
+	FindOne(id uint) (models.Tag, error)
 	Create(tag models.Tag) (models.Tag, error)
 	Update(tag models.Tag) (models.Tag, error)
-	Delete(id int) error
+	Delete(id uint) error
 }
 
 type TagRepository struct {
@@ -27,7 +27,7 @@ func (r *TagRepository) Find() ([]models.Tag, error) {
 	return tags, result.Error
 }
 
-func (r *TagRepository) FindOne(id int) (models.Tag, error) {
+func (r *TagRepository) FindOne(id uint) (models.Tag, error) {
 	var tag models.Tag
 	result := r.db.Where("id = ?", id).First(&tag)
 	return tag, result.Error
@@ -43,7 +43,7 @@ func (r *TagRepository) Update(tag models.Tag) (models.Tag, error) {
 	return tag, result.Error
 }
 
-func (r *TagRepository) Delete(id int) error {
+func (r *TagRepository) Delete(id uint) error {
 	result := r.db.Delete(&models.Tag{}, id)
 	return result.Error
 }

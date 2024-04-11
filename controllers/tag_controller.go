@@ -26,7 +26,7 @@ func (controller *TagController) FindTags(c *gin.Context) {
 
 func (controller *TagController) FindTag(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	tag, err := controller.tagService.FindOne(id)
+	tag, err := controller.tagService.FindOne(uint(id))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
 		return
@@ -55,7 +55,7 @@ func (controller *TagController) UpdateTag(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	tag, err := controller.tagService.Update(id, input)
+	tag, err := controller.tagService.Update(uint(id), input)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -65,7 +65,7 @@ func (controller *TagController) UpdateTag(c *gin.Context) {
 
 func (controller *TagController) DeleteTag(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	if err := controller.tagService.Delete(id); err != nil {
+	if err := controller.tagService.Delete(uint(id)); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to delete tag"})
 		return
 	}

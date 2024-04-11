@@ -7,11 +7,11 @@ import (
 
 type IUserRepository interface {
 	Find() ([]models.User, error)
-	FindOneById(id int) (models.User, error)
+	FindOneById(id uint) (models.User, error)
 	FindOneByEmail(email string) (models.User, error)
 	Create(user models.User) (models.User, error)
 	Update(user models.User) (models.User, error)
-	Delete(id int) error
+	Delete(id uint) error
 }
 
 type UserRepository struct {
@@ -28,7 +28,7 @@ func (r *UserRepository) Find() ([]models.User, error) {
 	return users, result.Error
 }
 
-func (r *UserRepository) FindOneById(id int) (models.User, error) {
+func (r *UserRepository) FindOneById(id uint) (models.User, error) {
 	var user models.User
 	result := r.db.Where("id = ?", id).First(&user)
 	return user, result.Error
@@ -50,7 +50,7 @@ func (r *UserRepository) Update(user models.User) (models.User, error) {
 	return user, result.Error
 }
 
-func (r *UserRepository) Delete(id int) error {
+func (r *UserRepository) Delete(id uint) error {
 	result := r.db.Delete(&models.User{}, id)
 	return result.Error
 }

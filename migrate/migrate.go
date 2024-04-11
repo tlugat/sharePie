@@ -8,5 +8,16 @@ import (
 func main() {
 	configs.LoadEnv()
 	db := configs.ConnectDB()
-	db.AutoMigrate(&models.User{})
+	err := db.AutoMigrate(
+		&models.User{},
+		&models.Tag{},
+		&models.Category{},
+		&models.Expense{},
+		&models.Tag{},
+		&models.Event{},
+	)
+	if err != nil {
+		panic(err)
+		return
+	}
 }

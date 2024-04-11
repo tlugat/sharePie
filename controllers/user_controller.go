@@ -26,7 +26,7 @@ func (controller *UserController) FindUsers(c *gin.Context) {
 
 func (controller *UserController) FindUser(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	user, err := controller.userService.FindOneById(id)
+	user, err := controller.userService.FindOneById(uint(id))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
 		return
@@ -41,7 +41,7 @@ func (controller *UserController) UpdateUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	user, err := controller.userService.Update(id, input)
+	user, err := controller.userService.Update(uint(id), input)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -51,7 +51,7 @@ func (controller *UserController) UpdateUser(c *gin.Context) {
 
 func (controller *UserController) DeleteUser(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	if err := controller.userService.Delete(id); err != nil {
+	if err := controller.userService.Delete(uint(id)); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to delete user"})
 		return
 	}

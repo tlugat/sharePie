@@ -26,7 +26,7 @@ func (controller *CategoryController) FindCategories(c *gin.Context) {
 
 func (controller *CategoryController) FindCategory(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	category, err := controller.categoryService.FindOne(id)
+	category, err := controller.categoryService.FindOne(uint(id))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
 		return
@@ -55,7 +55,7 @@ func (controller *CategoryController) UpdateCategory(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	category, err := controller.categoryService.Update(id, input)
+	category, err := controller.categoryService.Update(uint(id), input)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -65,7 +65,7 @@ func (controller *CategoryController) UpdateCategory(c *gin.Context) {
 
 func (controller *CategoryController) DeleteCategory(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	if err := controller.categoryService.Delete(id); err != nil {
+	if err := controller.categoryService.Delete(uint(id)); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to delete category"})
 		return
 	}
