@@ -17,6 +17,7 @@ func InitRoutes(db *gorm.DB, route *gin.RouterGroup) {
 	UserHandler(db, route)
 	AuthHandler(db, route, authMiddleware)
 	EventHandler(db, route, authMiddleware)
+	ExpenseHandler(db, route, authMiddleware)
 }
 
 func CategoryHandler(db *gorm.DB, route *gin.RouterGroup) {
@@ -76,4 +77,18 @@ func EventHandler(db *gorm.DB, route *gin.RouterGroup, middleware gin.HandlerFun
 	route.GET("/events/:id", middleware, eventController.FindEvent)
 	route.PATCH("/events/:id", middleware, eventController.UpdateEvent)
 	route.DELETE("/events/:id", middleware, eventController.DeleteEvent)
+}
+
+func ExpenseHandler(db *gorm.DB, route *gin.RouterGroup, middleware gin.HandlerFunc) {
+	expenseRepository := repositories.NewExpenseRepository(db)
+	tagRepository := repositories.NewTagRepository(db)
+	userRepository := repositories.NewUserRepository(db)
+	expenseService := services.NewExpenseService(expenseRepository, tagRepository, userRepository)
+	expenseController := controllers.NewExpenseController(expenseService)
+
+	route.GET("/expenses", middleware, expenseController.FindExpenses)
+	route.POST("/expenses", middleware, expenseController.CreateExpense)
+	route.GET("/expenses/:id", middleware, expenseController.FindExpense)
+	route.PATCH("/expenses/:id", middleware, expenseController.UpdateExpense)
+	route.DELETE("/expenses/:id", middleware, expenseController.DeleteExpense)
 }
