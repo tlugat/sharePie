@@ -15,10 +15,10 @@ type UpdateTagInput struct {
 
 type ITagService interface {
 	Find() ([]models.Tag, error)
-	FindOne(id int) (models.Tag, error)
+	FindOne(id uint) (models.Tag, error)
 	Create(input CreateTagInput) (models.Tag, error)
-	Update(id int, input UpdateTagInput) (models.Tag, error)
-	Delete(id int) error
+	Update(id uint, input UpdateTagInput) (models.Tag, error)
+	Delete(id uint) error
 }
 
 type TagService struct {
@@ -33,7 +33,7 @@ func (service *TagService) Find() ([]models.Tag, error) {
 	return service.Repository.Find()
 }
 
-func (service *TagService) FindOne(id int) (models.Tag, error) {
+func (service *TagService) FindOne(id uint) (models.Tag, error) {
 	return service.Repository.FindOne(id)
 }
 
@@ -42,7 +42,7 @@ func (service *TagService) Create(input CreateTagInput) (models.Tag, error) {
 	return service.Repository.Create(tag)
 }
 
-func (service *TagService) Update(id int, input UpdateTagInput) (models.Tag, error) {
+func (service *TagService) Update(id uint, input UpdateTagInput) (models.Tag, error) {
 	tag, err := service.Repository.FindOne(id)
 
 	if err != nil {
@@ -56,6 +56,6 @@ func (service *TagService) Update(id int, input UpdateTagInput) (models.Tag, err
 	return service.Repository.Update(tag)
 }
 
-func (service *TagService) Delete(id int) error {
+func (service *TagService) Delete(id uint) error {
 	return service.Repository.Delete(id)
 }

@@ -19,11 +19,11 @@ type UpdateUserInput struct {
 
 type IUserService interface {
 	Find() ([]models.User, error)
-	FindOneById(id int) (models.User, error)
+	FindOneById(id uint) (models.User, error)
 	FindOneByEmail(email string) (models.User, error)
 	Create(input CreateUserInput) (models.User, error)
-	Update(id int, input UpdateUserInput) (models.User, error)
-	Delete(id int) error
+	Update(id uint, input UpdateUserInput) (models.User, error)
+	Delete(id uint) error
 }
 
 type UserService struct {
@@ -38,7 +38,7 @@ func (service *UserService) Find() ([]models.User, error) {
 	return service.Repository.Find()
 }
 
-func (service *UserService) FindOneById(id int) (models.User, error) {
+func (service *UserService) FindOneById(id uint) (models.User, error) {
 	return service.Repository.FindOneById(id)
 }
 
@@ -51,7 +51,7 @@ func (service *UserService) Create(input CreateUserInput) (models.User, error) {
 	return service.Repository.Create(user)
 }
 
-func (service *UserService) Update(id int, input UpdateUserInput) (models.User, error) {
+func (service *UserService) Update(id uint, input UpdateUserInput) (models.User, error) {
 	user, err := service.Repository.FindOneById(id)
 
 	if err != nil {
@@ -68,6 +68,6 @@ func (service *UserService) Update(id int, input UpdateUserInput) (models.User, 
 	return service.Repository.Update(user)
 }
 
-func (service *UserService) Delete(id int) error {
+func (service *UserService) Delete(id uint) error {
 	return service.Repository.Delete(id)
 }

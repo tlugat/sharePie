@@ -6,19 +6,19 @@ import (
 )
 
 type CreateCategoryInput struct {
-	Name string `json:"title" binding:"required"`
+	Name string `json:"name" binding:"required"`
 }
 
 type UpdateCategoryInput struct {
-	Name string `json:"title"`
+	Name string `json:"name"`
 }
 
 type ICategoryService interface {
 	Find() ([]models.Category, error)
-	FindOne(id int) (models.Category, error)
+	FindOne(id uint) (models.Category, error)
 	Create(input CreateCategoryInput) (models.Category, error)
-	Update(id int, input UpdateCategoryInput) (models.Category, error)
-	Delete(id int) error
+	Update(id uint, input UpdateCategoryInput) (models.Category, error)
+	Delete(id uint) error
 }
 
 type CategoryService struct {
@@ -33,7 +33,7 @@ func (service *CategoryService) Find() ([]models.Category, error) {
 	return service.Repository.Find()
 }
 
-func (service *CategoryService) FindOne(id int) (models.Category, error) {
+func (service *CategoryService) FindOne(id uint) (models.Category, error) {
 	return service.Repository.FindOne(id)
 }
 
@@ -42,7 +42,7 @@ func (service *CategoryService) Create(input CreateCategoryInput) (models.Catego
 	return service.Repository.Create(category)
 }
 
-func (service *CategoryService) Update(id int, input UpdateCategoryInput) (models.Category, error) {
+func (service *CategoryService) Update(id uint, input UpdateCategoryInput) (models.Category, error) {
 	category, err := service.Repository.FindOne(id)
 
 	if err != nil {
@@ -56,6 +56,6 @@ func (service *CategoryService) Update(id int, input UpdateCategoryInput) (model
 	return service.Repository.Update(category)
 }
 
-func (service *CategoryService) Delete(id int) error {
+func (service *CategoryService) Delete(id uint) error {
 	return service.Repository.Delete(id)
 }

@@ -16,6 +16,7 @@ func InitRoutes(db *gorm.DB, route *gin.RouterGroup) {
 	TagHandler(db, route)
 	UserHandler(db, route)
 	AuthHandler(db, route, authMiddleware)
+	EventHandler(db, route, authMiddleware)
 }
 
 func CategoryHandler(db *gorm.DB, route *gin.RouterGroup) {
@@ -61,4 +62,18 @@ func AuthHandler(db *gorm.DB, route *gin.RouterGroup, middleware gin.HandlerFunc
 	route.POST("/signup", authController.Signup)
 	route.POST("/login", authController.Login)
 	route.GET("/validate", middleware, authController.Validate)
+}
+
+func EventHandler(db *gorm.DB, route *gin.RouterGroup, middleware gin.HandlerFunc) {
+	eventRepository := repositories.NewEventRepository(db)
+	categoryRepository := repositories.NewCategoryRepository(db)
+	userRepository := repositories.NewUserRepository(db)
+	eventService := services.NewEventService(eventRepository, categoryRepository, userRepository)
+	eventController := controllers.NewEventController(eventService)
+
+	route.GET("/events", middleware, eventController.FindEvents)
+	route.POST("/events", middleware, eventController.CreateEvent)
+	route.GET("/events/:id", middleware, eventController.FindEvent)
+	route.PATCH("/events/:id", middleware, eventController.UpdateEvent)
+	route.DELETE("/events/:id", middleware, eventController.DeleteEvent)
 }

@@ -13,5 +13,5 @@ type Expense struct {
 	Users       []User  `json:"users" gorm:"many2many:expense_users;"`
 	Image       string  `json:"image"`
 	Amount      float64 `string:"cost"`
-	EventID     uint
+	EventID     uint    `json:"eventId"`
 }
