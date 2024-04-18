@@ -4,21 +4,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"sharePie-api/controllers"
-	"sharePie-api/middlewares"
 	"sharePie-api/repositories"
 	"sharePie-api/services"
 )
-
-func InitRoutes(db *gorm.DB, route *gin.RouterGroup) {
-	authMiddleware := middlewares.RequireAuth(db)
-
-	CategoryHandler(db, route)
-	TagHandler(db, route)
-	UserHandler(db, route)
-	AuthHandler(db, route, authMiddleware)
-	EventHandler(db, route, authMiddleware)
-	ExpenseHandler(db, route, authMiddleware)
-}
 
 func CategoryHandler(db *gorm.DB, route *gin.RouterGroup) {
 	categoryRepository := repositories.NewCategoryRepository(db)
