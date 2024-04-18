@@ -2,8 +2,8 @@ package helpers
 
 import (
 	"github.com/gin-gonic/gin"
-	"go-project/models"
 	"net/http"
+	"sharePie-api/models"
 )
 
 func GetUserFromContext(c *gin.Context) (*models.User, bool) {
