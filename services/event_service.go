@@ -1,8 +1,8 @@
 package services
 
 import (
-	"go-project/models"
-	"go-project/repositories"
+	"sharePie-api/models"
+	"sharePie-api/repositories"
 )
 
 type CreateEventInput struct {

@@ -1,8 +1,8 @@
 package repositories
 
 import (
-	"go-project/models"
 	"gorm.io/gorm"
+	"sharePie-api/models"
 )
 
 type ITagRepository interface {

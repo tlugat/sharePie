@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"go-project/models"
 	"gorm.io/gorm"
 	"net/http"
 	"os"
+	"sharePie-api/models"
 	"strings"
 	"time"
 )

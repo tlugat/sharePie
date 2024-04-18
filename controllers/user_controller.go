@@ -2,8 +2,8 @@ package controllers
 
 import (
 	"github.com/gin-gonic/gin"
-	"go-project/services"
 	"net/http"
+	"sharePie-api/services"
 	"strconv"
 )
 
@@ -15,6 +15,15 @@ func NewUserController(service services.IUserService) *UserController {
 	return &UserController{userService: service}
 }
 
+// FindUsers retrieves all users.
+// @Summary List all users
+// @Description Retrieves a list of all users from the database
+// @Tags Users
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} map[string]interface{} "Returns a list of users"
+// @Failure 500 {object} map[string]interface{} "Returns an error if the request fails"
+// @Router /users [get]
 func (controller *UserController) FindUsers(c *gin.Context) {
 	users, err := controller.userService.Find()
 	if err != nil {
@@ -24,6 +33,16 @@ func (controller *UserController) FindUsers(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": users})
 }
 
+// FindUser retrieves a user by ID.
+// @Summary Get a single user
+// @Description Retrieves a user by its ID from the database
+// @Tags Users
+// @Accept  json
+// @Produce  json
+// @Param id path int true "User ID"
+// @Success 200 {object} map[string]interface{} "Returns the specified user"
+// @Failure 400 {object} map[string]interface{} "Returns an error if the user is not found"
+// @Router /users/{id} [get]
 func (controller *UserController) FindUser(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	user, err := controller.userService.FindOneById(uint(id))
@@ -34,6 +53,17 @@ func (controller *UserController) FindUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": user})
 }
 
+// UpdateUser updates an existing user.
+// @Summary Update a user
+// @Description Updates an existing user with new data
+// @Tags Users
+// @Accept  json
+// @Produce  json
+// @Param id path int true "User ID"
+// @Param input body services.UpdateUserInput true "User update data"
+// @Success 200 {object} map[string]interface{} "Returns the updated user"
+// @Failure 400 {object} map[string]interface{} "Returns an error if the input is invalid or the user does not exist"
+// @Router /users/{id} [put]
 func (controller *UserController) UpdateUser(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	var input services.UpdateUserInput
@@ -49,6 +79,16 @@ func (controller *UserController) UpdateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": user})
 }
 
+// DeleteUser removes a user.
+// @Summary Delete a user
+// @Description Deletes a user from the database
+// @Tags Users
+// @Accept  json
+// @Produce  json
+// @Param id path int true "User ID"
+// @Success 200 {object} map[string]interface{} "Confirms successful deletion"
+// @Failure 400 {object} map[string]interface{} "Returns an error if the user cannot be deleted"
+// @Router /users/{id} [delete]
 func (controller *UserController) DeleteUser(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	if err := controller.userService.Delete(uint(id)); err != nil {

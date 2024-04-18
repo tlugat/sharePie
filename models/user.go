@@ -1,8 +1,8 @@
 package models
 
 import (
-	"go-project/utils"
 	"gorm.io/gorm"
+	"sharePie-api/utils"
 )
 
 type User struct {

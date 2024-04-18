@@ -1,8 +1,8 @@
 package main
 
 import (
-	"go-project/configs"
-	"go-project/models"
+	"sharePie-api/configs"
+	"sharePie-api/models"
 )
 
 func main() {

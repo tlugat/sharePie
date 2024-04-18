@@ -2,9 +2,9 @@ package controllers
 
 import (
 	"github.com/gin-gonic/gin"
-	"go-project/helpers"
-	"go-project/services"
 	"net/http"
+	"sharePie-api/helpers"
+	"sharePie-api/services"
 	"strconv"
 )
 
@@ -16,6 +16,15 @@ func NewEventController(service services.IEventService) *EventController {
 	return &EventController{eventService: service}
 }
 
+// FindEvents retrieves all events.
+// @Summary List all events
+// @Description Retrieves a list of all events from the database
+// @Tags Events
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} map[string]interface{} "Returns a list of events"
+// @Failure 500 {object} map[string]interface{} "Returns an error if the request fails"
+// @Router /events [get]
 func (controller *EventController) FindEvents(c *gin.Context) {
 	events, err := controller.eventService.Find()
 	if err != nil {
@@ -25,6 +34,16 @@ func (controller *EventController) FindEvents(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": events})
 }
 
+// FindEvent retrieves an event by ID.
+// @Summary Get a single event
+// @Description Retrieves an event by its ID from the database
+// @Tags Events
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Event ID"
+// @Success 200 {object} map[string]interface{} "Returns the specified event"
+// @Failure 400 {object} map[string]interface{} "Returns an error if the event is not found"
+// @Router /events/{id} [get]
 func (controller *EventController) FindEvent(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	event, err := controller.eventService.FindOne(uint(id))
@@ -35,6 +54,16 @@ func (controller *EventController) FindEvent(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": event})
 }
 
+// CreateEvent adds a new event.
+// @Summary Add a new event
+// @Description Adds a new event to the database, linked to the authenticated user
+// @Tags Events
+// @Accept  json
+// @Produce  json
+// @Param input body services.CreateEventInput true "Event creation data"
+// @Success 200 {object} map[string]interface{} "Returns the newly created event"
+// @Failure 400 {object} map[string]interface{} "Returns an error if the input is invalid or user authentication fails"
+// @Router /events [post]
 func (controller *EventController) CreateEvent(c *gin.Context) {
 	var input services.CreateEventInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -56,6 +85,17 @@ func (controller *EventController) CreateEvent(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": event})
 }
 
+// UpdateEvent updates an existing event.
+// @Summary Update an event
+// @Description Updates an existing event with new data
+// @Tags Events
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Event ID"
+// @Param input body services.UpdateEventInput true "Event update data"
+// @Success 200 {object} map[string]interface{} "Returns the updated event"
+// @Failure 400 {object} map[string]interface{} "Returns an error if the input is invalid or the event does not exist"
+// @Router /events/{id} [put]
 func (controller *EventController) UpdateEvent(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	var input services.UpdateEventInput
@@ -71,6 +111,16 @@ func (controller *EventController) UpdateEvent(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": event})
 }
 
+// DeleteEvent removes an event.
+// @Summary Delete an event
+// @Description Deletes an event from the database
+// @Tags Events
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Event ID"
+// @Success 200 {object} map[string]interface{} "Confirms successful deletion"
+// @Failure 400 {object} map[string]interface{} "Returns an error if the event cannot be deleted"
+// @Router /events/{id} [delete]
 func (controller *EventController) DeleteEvent(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	if err := controller.eventService.Delete(uint(id)); err != nil {

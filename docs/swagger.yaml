@@ -1,0 +1,856 @@
+basePath: /api/v1
+definitions:
+  controllers.LoginInput:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  services.CreateCategoryInput:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  services.CreateEventInput:
+    properties:
+      category:
+        type: integer
+      description:
+        type: string
+      goal:
+        type: number
+      image:
+        type: string
+      name:
+        type: string
+    required:
+    - description
+    - name
+    type: object
+  services.CreateExpenseInput:
+    properties:
+      amount:
+        type: number
+      description:
+        type: string
+      event:
+        type: integer
+      image:
+        type: string
+      name:
+        type: string
+      tag:
+        type: integer
+    required:
+    - amount
+    - description
+    - event
+    - name
+    type: object
+  services.CreateTagInput:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  services.CreateUserInput:
+    properties:
+      email:
+        type: string
+      firstName:
+        type: string
+      lastName:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - firstName
+    - lastName
+    - password
+    type: object
+  services.UpdateCategoryInput:
+    properties:
+      name:
+        type: string
+    type: object
+  services.UpdateEventInput:
+    properties:
+      category:
+        type: integer
+      description:
+        type: string
+      goal:
+        type: number
+      image:
+        type: string
+      name:
+        type: string
+    type: object
+  services.UpdateExpenseInput:
+    properties:
+      amount:
+        type: number
+      category:
+        type: integer
+      description:
+        type: string
+      image:
+        type: string
+      name:
+        type: string
+    required:
+    - amount
+    - name
+    type: object
+  services.UpdateTagInput:
+    properties:
+      title:
+        type: string
+    type: object
+  services.UpdateUserInput:
+    properties:
+      firstName:
+        type: string
+      lastName:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is the API of SharePie app. You can visit the GitHub repository
+    at https://github.com/tlugat/sharePie-api
+  title: SharePie API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user and returns a JWT token
+      parameters:
+      - description: Login credentials
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.LoginInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns a JWT token
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Returns an error if the login credentials are invalid
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Log in a user
+      tags:
+      - Auth
+  /auth/signup:
+    post:
+      consumes:
+      - application/json
+      description: Registers a new user in the system
+      parameters:
+      - description: User information
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/services.CreateUserInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns the created user
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Returns an error if the input is invalid
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Returns an error if the user creation fails
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Register a new user
+      tags:
+      - Auth
+  /auth/validate:
+    get:
+      consumes:
+      - application/json
+      description: Checks if the current user is valid in the system
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns the current user
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Validate a user
+      tags:
+      - Auth
+  /categories:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of all categories from the database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns a list of categories
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Returns an error if the request fails
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List all categories
+      tags:
+      - Categories
+    post:
+      consumes:
+      - application/json
+      description: Adds a new category to the database
+      parameters:
+      - description: Category creation data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/services.CreateCategoryInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns the newly created category
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Returns an error if the input is invalid
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Add a new category
+      tags:
+      - Categories
+  /categories/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a category from the database
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Confirms successful deletion
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Returns an error if the category cannot be deleted
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete a category
+      tags:
+      - Categories
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a category by its ID from the database
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns the specified category
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Returns an error if the category is not found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get a single category
+      tags:
+      - Categories
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing category with new data
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Category update data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/services.UpdateCategoryInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns the updated category
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Returns an error if the input is invalid or the category does
+            not exist
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update a category
+      tags:
+      - Categories
+  /events:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of all events from the database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns a list of events
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Returns an error if the request fails
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List all events
+      tags:
+      - Events
+    post:
+      consumes:
+      - application/json
+      description: Adds a new event to the database, linked to the authenticated user
+      parameters:
+      - description: Event creation data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/services.CreateEventInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns the newly created event
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Returns an error if the input is invalid or user authentication
+            fails
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Add a new event
+      tags:
+      - Events
+  /events/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes an event from the database
+      parameters:
+      - description: Event ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Confirms successful deletion
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Returns an error if the event cannot be deleted
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete an event
+      tags:
+      - Events
+    get:
+      consumes:
+      - application/json
+      description: Retrieves an event by its ID from the database
+      parameters:
+      - description: Event ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns the specified event
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Returns an error if the event is not found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get a single event
+      tags:
+      - Events
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing event with new data
+      parameters:
+      - description: Event ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Event update data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/services.UpdateEventInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns the updated event
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Returns an error if the input is invalid or the event does
+            not exist
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update an event
+      tags:
+      - Events
+  /expenses:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of all expenses from the database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns a list of expenses
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Returns an error if the request fails
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List all expenses
+      tags:
+      - Expenses
+    post:
+      consumes:
+      - application/json
+      description: Adds a new expense to the database, linked to the authenticated
+        user
+      parameters:
+      - description: Expense creation data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/services.CreateExpenseInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns the newly created expense
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Returns an error if the input is invalid or user authentication
+            fails
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Add a new expense
+      tags:
+      - Expenses
+  /expenses/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes an expense from the database
+      parameters:
+      - description: Expense ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Confirms successful deletion
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Returns an error if the expense cannot be deleted
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete an expense
+      tags:
+      - Expenses
+    get:
+      consumes:
+      - application/json
+      description: Retrieves an expense by its ID from the database
+      parameters:
+      - description: Expense ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns the specified expense
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Returns an error if the expense is not found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get a single expense
+      tags:
+      - Expenses
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing expense with new data
+      parameters:
+      - description: Expense ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Expense update data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/services.UpdateExpenseInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns the updated expense
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Returns an error if the input is invalid or the expense does
+            not exist
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update an expense
+      tags:
+      - Expenses
+  /tags:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of all tags from the database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns a list of tags
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Returns an error if the request fails
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List all tags
+      tags:
+      - Tags
+    post:
+      consumes:
+      - application/json
+      description: Adds a new tag to the database
+      parameters:
+      - description: Tag creation data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/services.CreateTagInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns the newly created tag
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Returns an error if the input is invalid
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Add a new tag
+      tags:
+      - Tags
+  /tags/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a tag from the database
+      parameters:
+      - description: Tag ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Confirms successful deletion
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Returns an error if the tag cannot be deleted
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete a tag
+      tags:
+      - Tags
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a tag by its ID from the database
+      parameters:
+      - description: Tag ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns the specified tag
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Returns an error if the tag is not found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get a single tag
+      tags:
+      - Tags
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing tag with new data
+      parameters:
+      - description: Tag ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Tag update data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/services.UpdateTagInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns the updated tag
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Returns an error if the input is invalid or the tag does not
+            exist
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update a tag
+      tags:
+      - Tags
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of all users from the database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns a list of users
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Returns an error if the request fails
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List all users
+      tags:
+      - Users
+  /users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a user from the database
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Confirms successful deletion
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Returns an error if the user cannot be deleted
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete a user
+      tags:
+      - Users
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a user by its ID from the database
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns the specified user
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Returns an error if the user is not found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get a single user
+      tags:
+      - Users
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing user with new data
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: User update data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/services.UpdateUserInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns the updated user
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Returns an error if the input is invalid or the user does not
+            exist
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update a user
+      tags:
+      - Users
+swagger: "2.0"

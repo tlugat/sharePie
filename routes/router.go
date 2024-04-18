@@ -2,11 +2,11 @@ package routes
 
 import (
 	"github.com/gin-gonic/gin"
-	"go-project/controllers"
-	"go-project/middlewares"
-	"go-project/repositories"
-	"go-project/services"
 	"gorm.io/gorm"
+	"sharePie-api/controllers"
+	"sharePie-api/middlewares"
+	"sharePie-api/repositories"
+	"sharePie-api/services"
 )
 
 func InitRoutes(db *gorm.DB, route *gin.RouterGroup) {
