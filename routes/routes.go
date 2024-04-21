@@ -8,39 +8,39 @@ import (
 	"sharePie-api/services"
 )
 
-func CategoryHandler(db *gorm.DB, route *gin.RouterGroup) {
+func CategoryHandler(db *gorm.DB, route *gin.RouterGroup, middleware gin.HandlerFunc) {
 	categoryRepository := repositories.NewCategoryRepository(db)
 	categoryService := services.NewCategoryService(categoryRepository)
 	categoryController := controllers.NewCategoryController(categoryService)
 
-	route.GET("/categories", categoryController.FindCategories)
-	route.POST("/categories", categoryController.CreateCategory)
-	route.GET("/categories/:id", categoryController.FindCategory)
-	route.PATCH("/categories/:id", categoryController.UpdateCategory)
-	route.DELETE("/categories/:id", categoryController.DeleteCategory)
+	route.GET("/categories", middleware, categoryController.FindCategories)
+	route.POST("/categories", middleware, categoryController.CreateCategory)
+	route.GET("/categories/:id", middleware, categoryController.FindCategory)
+	route.PATCH("/categories/:id", middleware, categoryController.UpdateCategory)
+	route.DELETE("/categories/:id", middleware, categoryController.DeleteCategory)
 }
 
-func TagHandler(db *gorm.DB, route *gin.RouterGroup) {
+func TagHandler(db *gorm.DB, route *gin.RouterGroup, middleware gin.HandlerFunc) {
 	tagRepository := repositories.NewTagRepository(db)
 	tagService := services.NewTagService(tagRepository)
 	tagController := controllers.NewTagController(tagService)
 
-	route.GET("/tags", tagController.FindTags)
-	route.POST("/tags", tagController.CreateTag)
-	route.GET("/tags/:id", tagController.FindTag)
-	route.PATCH("/tags/:id", tagController.UpdateTag)
-	route.DELETE("/tags/:id", tagController.DeleteTag)
+	route.GET("/tags", middleware, tagController.FindTags)
+	route.POST("/tags", middleware, tagController.CreateTag)
+	route.GET("/tags/:id", middleware, tagController.FindTag)
+	route.PATCH("/tags/:id", middleware, tagController.UpdateTag)
+	route.DELETE("/tags/:id", middleware, tagController.DeleteTag)
 }
 
-func UserHandler(db *gorm.DB, route *gin.RouterGroup) {
+func UserHandler(db *gorm.DB, route *gin.RouterGroup, middleware gin.HandlerFunc) {
 	userRepository := repositories.NewUserRepository(db)
 	userService := services.NewUserService(userRepository)
 	userController := controllers.NewUserController(userService)
 
-	route.GET("/users", userController.FindUsers)
-	route.GET("/users/:id", userController.FindUser)
-	route.PATCH("/users/:id", userController.UpdateUser)
-	route.DELETE("/users/:id", userController.DeleteUser)
+	route.GET("/users", middleware, userController.FindUsers)
+	route.GET("/users/:id", middleware, userController.FindUser)
+	route.PATCH("/users/:id", middleware, userController.UpdateUser)
+	route.DELETE("/users/:id", middleware, userController.DeleteUser)
 }
 
 func AuthHandler(db *gorm.DB, route *gin.RouterGroup, middleware gin.HandlerFunc) {
@@ -69,6 +69,7 @@ func EventHandler(db *gorm.DB, route *gin.RouterGroup, middleware gin.HandlerFun
 	route.DELETE("/events/:id", middleware, eventController.DeleteEvent)
 	route.GET("/events/:id/summary", middleware, eventController.GetEventBalanceSummary)
 	route.GET("/events/:id/users", middleware, eventController.GetEventUsers)
+	route.POST("/events/join", middleware, eventController.JoinEvent)
 }
 
 func ExpenseHandler(db *gorm.DB, route *gin.RouterGroup, middleware gin.HandlerFunc) {

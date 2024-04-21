@@ -8,6 +8,10 @@ import (
 	"strconv"
 )
 
+type JoinEventInput struct {
+	Code string `json:"code" binding:"required"`
+}
+
 type EventController struct {
 	eventService   services.IEventService
 	balanceService services.IEventBalanceService
@@ -180,4 +184,28 @@ func (controller *EventController) GetEventBalanceSummary(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": balanceSummary})
+}
+
+func (controller *EventController) JoinEvent(c *gin.Context) {
+
+	var input JoinEventInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	user, ok := helpers.GetUserFromContext(c)
+
+	if !ok {
+		return
+	}
+
+	err := controller.eventService.AddUser(input.Code, *user)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": true})
 }

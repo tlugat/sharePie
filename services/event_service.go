@@ -3,6 +3,7 @@ package services
 import (
 	"sharePie-api/models"
 	"sharePie-api/repositories"
+	"sharePie-api/utils"
 )
 
 type CreateEventInput struct {
@@ -28,6 +29,7 @@ type IEventService interface {
 	Update(id uint, input UpdateEventInput) (models.Event, error)
 	Delete(id uint) error
 	GetUsers(id uint) ([]models.User, error)
+	AddUser(code string, user models.User) error
 }
 
 type EventService struct {
@@ -102,6 +104,7 @@ func (service *EventService) Create(input CreateEventInput, user models.User) (m
 		Image:       input.Image,
 		Goal:        input.Goal,
 		AuthorID:    user.ID,
+		Code:        utils.GenerateInvitationCode(6),
 	}
 
 	return service.Repository.Create(event)
@@ -144,4 +147,34 @@ func (service *EventService) GetUsers(id uint) ([]models.User, error) {
 	}
 
 	return users, nil
+}
+
+func (service *EventService) AddUser(code string, user models.User) error {
+	event, err := service.Repository.FindOneByCode(code)
+	if err != nil {
+		return err
+	}
+
+	users, err := service.UserRepository.FindByEventId(event.ID)
+	if err != nil {
+		return err
+	}
+	isUserAlreadyInEvent := false
+
+	for _, u := range users {
+		if u.ID == user.ID {
+			isUserAlreadyInEvent = true
+			break
+		}
+	}
+
+	if isUserAlreadyInEvent {
+		return nil
+	}
+
+	event.Users = append(users, user)
+
+	_, err = service.Repository.Update(event)
+
+	return err
 }
