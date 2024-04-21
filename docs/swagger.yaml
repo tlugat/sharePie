@@ -476,6 +476,34 @@ paths:
       summary: Update an event
       tags:
       - Events
+  /events/{id}/balance:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a summary of the event's balance, including the total
+        goal, total expenses, and the balance
+      parameters:
+      - description: Event ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns the event's balance summary
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Returns an error if the event does not exist
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get event balance summary
+      tags:
+      - Events
   /expenses:
     get:
       consumes:

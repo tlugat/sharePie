@@ -522,6 +522,46 @@ const docTemplate = `{
                 }
             }
         },
+        "/events/{id}/balance": {
+            "get": {
+                "description": "Retrieves a summary of the event's balance, including the total goal, total expenses, and the balance",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Events"
+                ],
+                "summary": "Get event balance summary",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Event ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns the event's balance summary",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Returns an error if the event does not exist",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/expenses": {
             "get": {
                 "description": "Retrieves a list of all expenses from the database",

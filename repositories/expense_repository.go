@@ -2,11 +2,13 @@ package repositories
 
 import (
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"sharePie-api/models"
 )
 
 type IExpenseRepository interface {
 	Find() ([]models.Expense, error)
+	FindByEventId(id uint) ([]models.Expense, error)
 	FindOne(id uint) (models.Expense, error)
 	Create(expense models.Expense) (models.Expense, error)
 	Update(expense models.Expense) (models.Expense, error)
@@ -23,13 +25,19 @@ func NewExpenseRepository(db *gorm.DB) IExpenseRepository {
 
 func (r *ExpenseRepository) Find() ([]models.Expense, error) {
 	var expenses []models.Expense
-	result := r.db.Find(&expenses)
+	result := r.db.Preload(clause.Associations).Find(&expenses)
+	return expenses, result.Error
+}
+
+func (r *ExpenseRepository) FindByEventId(id uint) ([]models.Expense, error) {
+	var expenses []models.Expense
+	result := r.db.Preload(clause.Associations).Where("event_id = ?", id).Find(&expenses)
 	return expenses, result.Error
 }
 
 func (r *ExpenseRepository) FindOne(id uint) (models.Expense, error) {
 	var expense models.Expense
-	result := r.db.Where("id = ?", id).First(&expense)
+	result := r.db.Preload(clause.Associations).Where("id = ?", id).First(&expense)
 	return expense, result.Error
 }
 

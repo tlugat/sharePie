@@ -8,6 +8,7 @@ import (
 type CreateUserInput struct {
 	FirstName string `json:"firstName" binding:"required"`
 	LastName  string `json:"lastName" binding:"required"`
+	Username  string `json:"username" binding:"required"`
 	Email     string `json:"email" binding:"required"`
 	Password  string `json:"password" binding:"required"`
 }
@@ -15,6 +16,7 @@ type CreateUserInput struct {
 type UpdateUserInput struct {
 	FirstName string `json:"firstName"`
 	LastName  string `json:"lastName"`
+	Username  string `json:"username"`
 }
 
 type IUserService interface {
@@ -47,7 +49,7 @@ func (service *UserService) FindOneByEmail(email string) (models.User, error) {
 }
 
 func (service *UserService) Create(input CreateUserInput) (models.User, error) {
-	user := models.User{FirstName: input.FirstName, LastName: input.LastName, Email: input.Email, Password: input.Password}
+	user := models.User{FirstName: input.FirstName, LastName: input.LastName, Username: input.Username, Email: input.Email, Password: input.Password}
 	return service.Repository.Create(user)
 }
 
@@ -63,6 +65,9 @@ func (service *UserService) Update(id uint, input UpdateUserInput) (models.User,
 	}
 	if input.LastName != "" {
 		user.LastName = input.LastName
+	}
+	if input.Username != "" {
+		user.Username = input.Username
 	}
 
 	return service.Repository.Update(user)
