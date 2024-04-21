@@ -9,11 +9,12 @@ import (
 )
 
 type EventController struct {
-	eventService services.IEventService
+	eventService   services.IEventService
+	balanceService services.IEventBalanceService
 }
 
-func NewEventController(service services.IEventService) *EventController {
-	return &EventController{eventService: service}
+func NewEventController(service services.IEventService, balanceService services.IEventBalanceService) *EventController {
+	return &EventController{eventService: service, balanceService: balanceService}
 }
 
 // FindEvents retrieves all events.
@@ -128,4 +129,55 @@ func (controller *EventController) DeleteEvent(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": true})
+}
+
+// GetEventUsers retrieves all users for an event.
+// @Summary Get event users
+// @Description Retrieves all users for a specified event
+// @Tags Events
+// @Accept  json
+// @Produce  json
+// @Param eventId path int true "Event ID"
+// @Success 200 {object} map[string]interface{} "Returns a list of users for the event"
+// @Failure 400 {object} map[string]interface{} "Returns an error if the event does not exist"
+// @Router /events/{id}/users [get]
+func (controller *EventController) GetEventUsers(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	users, err := controller.eventService.GetUsers(uint(id))
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Event not found!"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": users})
+}
+
+// GetEventBalanceSummary retrieves a summary of balances for an event.
+// @Summary Get event balance summary
+// @Description Retrieves a summary of balances for a specified event
+// @Tags Events
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Event ID"
+// @Success 200 {object} map[string]interface{} "Returns a list of balances for the event"
+// @Failure 400 {object} map[string]interface{} "Returns an error if the event does not exist"
+// @Router /events/{id}/summary [get]
+func (controller *EventController) GetEventBalanceSummary(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	event, err := controller.eventService.FindOne(uint(id))
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Event not found!"})
+		return
+	}
+
+	balanceSummary, err := controller.balanceService.GetBalanceSummary(event)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": balanceSummary})
 }

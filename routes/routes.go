@@ -57,14 +57,18 @@ func EventHandler(db *gorm.DB, route *gin.RouterGroup, middleware gin.HandlerFun
 	eventRepository := repositories.NewEventRepository(db)
 	categoryRepository := repositories.NewCategoryRepository(db)
 	userRepository := repositories.NewUserRepository(db)
-	eventService := services.NewEventService(eventRepository, categoryRepository, userRepository)
-	eventController := controllers.NewEventController(eventService)
+	expenseRepository := repositories.NewExpenseRepository(db)
+	eventService := services.NewEventService(eventRepository, categoryRepository, userRepository, expenseRepository)
+	eventBalanceService := services.NewEventBalanceService(eventRepository, expenseRepository, userRepository)
+	eventController := controllers.NewEventController(eventService, eventBalanceService)
 
 	route.GET("/events", middleware, eventController.FindEvents)
 	route.POST("/events", middleware, eventController.CreateEvent)
 	route.GET("/events/:id", middleware, eventController.FindEvent)
 	route.PATCH("/events/:id", middleware, eventController.UpdateEvent)
 	route.DELETE("/events/:id", middleware, eventController.DeleteEvent)
+	route.GET("/events/:id/summary", middleware, eventController.GetEventBalanceSummary)
+	route.GET("/events/:id/users", middleware, eventController.GetEventUsers)
 }
 
 func ExpenseHandler(db *gorm.DB, route *gin.RouterGroup, middleware gin.HandlerFunc) {

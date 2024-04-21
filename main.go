@@ -58,7 +58,7 @@ func main() {
 				continue
 			}
 
-			ws.HandleEvent(conn, event)
+			ws.HandleEvent(conn, event, db)
 		}
 	})
 

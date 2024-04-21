@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
+	"gorm.io/gorm"
+	"sharePie-api/repositories"
+	"sharePie-api/services"
 )
 
 type Event struct {
@@ -11,12 +14,15 @@ type Event struct {
 	Data json.RawMessage `json:"data"`
 }
 
-func HandleEvent(conn *websocket.Conn, event Event) {
+func HandleEvent(conn *websocket.Conn, event Event, db *gorm.DB) {
+	eventRepository := repositories.NewEventRepository(db)
+	expenseRepository := repositories.NewExpenseRepository(db)
+	userRepository := repositories.NewUserRepository(db)
+	eventBalanceService := services.NewEventBalanceService(eventRepository, expenseRepository, userRepository)
+
 	switch event.Type {
-	case "message":
-		handleMessage(conn, event.Data)
 	case "join":
-		handleUserJoined(conn)
+		handleUserJoined(conn, eventBalanceService)
 	case "leave":
 		handleUserLeft(conn)
 	default:
@@ -24,11 +30,7 @@ func HandleEvent(conn *websocket.Conn, event Event) {
 	}
 }
 
-func handleMessage(conn *websocket.Conn, data json.RawMessage) {
-	fmt.Println("Message received:", string(data))
-}
-
-func handleUserJoined(conn *websocket.Conn) {
+func handleUserJoined(conn *websocket.Conn, eventBalanceService services.IEventBalanceService) {
 	fmt.Println("User joined")
 }
 

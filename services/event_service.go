@@ -27,22 +27,27 @@ type IEventService interface {
 	Create(input CreateEventInput, user models.User) (models.Event, error)
 	Update(id uint, input UpdateEventInput) (models.Event, error)
 	Delete(id uint) error
+	GetUsers(id uint) ([]models.User, error)
 }
 
 type EventService struct {
 	Repository         repositories.IEventRepository
 	CategoryRepository repositories.ICategoryRepository
 	UserRepository     repositories.IUserRepository
+	ExpenseRepository  repositories.IExpenseRepository
 }
 
 func NewEventService(
 	repository repositories.IEventRepository,
 	categoryRepository repositories.ICategoryRepository,
-	userRepository repositories.IUserRepository) IEventService {
+	userRepository repositories.IUserRepository,
+	expenseRepository repositories.IExpenseRepository,
+) IEventService {
 	return &EventService{
 		Repository:         repository,
 		CategoryRepository: categoryRepository,
 		UserRepository:     userRepository,
+		ExpenseRepository:  expenseRepository,
 	}
 }
 
@@ -130,4 +135,13 @@ func (service *EventService) Update(id uint, input UpdateEventInput) (models.Eve
 
 func (service *EventService) Delete(id uint) error {
 	return service.Repository.Delete(id)
+}
+
+func (service *EventService) GetUsers(id uint) ([]models.User, error) {
+	users, err := service.UserRepository.FindByEventId(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
 }

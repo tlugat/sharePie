@@ -7,6 +7,8 @@ import (
 
 type IUserRepository interface {
 	Find() ([]models.User, error)
+	FindByIds(ids []uint, users *[]models.User) error
+	FindByEventId(eventId uint) ([]models.User, error)
 	FindOneById(id uint) (models.User, error)
 	FindOneByEmail(email string) (models.User, error)
 	Create(user models.User) (models.User, error)
@@ -25,6 +27,16 @@ func NewUserRepository(db *gorm.DB) IUserRepository {
 func (r *UserRepository) Find() ([]models.User, error) {
 	var users []models.User
 	result := r.db.Find(&users)
+	return users, result.Error
+}
+
+func (r *UserRepository) FindByIds(ids []uint, users *[]models.User) error {
+	return r.db.Where("id IN ?", ids).Find(users).Error
+}
+
+func (r *UserRepository) FindByEventId(eventId uint) ([]models.User, error) {
+	var users []models.User
+	result := r.db.Joins("JOIN event_users ON users.id = event_users.user_id").Where("event_users.event_id = ?", eventId).Find(&users)
 	return users, result.Error
 }
 
