@@ -14,4 +14,5 @@ type Event struct {
 	Image       string   `json:"image"`
 	Goal        float64  `json:"goal"`
 	Expenses    []Expense
+	Code        string `json:"code" gorm:"unique"`
 }

@@ -11,6 +11,7 @@ type IEventRepository interface {
 	Create(event models.Event) (models.Event, error)
 	Update(event models.Event) (models.Event, error)
 	Delete(id uint) error
+	FindOneByCode(code string) (models.Event, error)
 }
 
 type EventRepository struct {
@@ -46,4 +47,10 @@ func (r *EventRepository) Update(event models.Event) (models.Event, error) {
 func (r *EventRepository) Delete(id uint) error {
 	result := r.db.Delete(&models.Event{}, id)
 	return result.Error
+}
+
+func (r *EventRepository) FindOneByCode(code string) (models.Event, error) {
+	var event models.Event
+	result := r.db.Where("code = ?", code).First(&event)
+	return event, result.Error
 }
