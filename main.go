@@ -69,6 +69,7 @@ func main() {
 	routes.AuthHandler(db, api, authMiddleware)
 	routes.EventHandler(db, api, authMiddleware)
 	routes.ExpenseHandler(db, api, authMiddleware)
+	routes.AchievementHandler(db, api, authMiddleware)
 
 	err := r.Run()
 
