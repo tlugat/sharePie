@@ -36,7 +36,7 @@ func main() {
 
 	api := r.Group("api/v1")
 
-	api.GET("/ws", func(c *gin.Context) {
+	api.GET("/ws", authMiddleware, func(c *gin.Context) {
 		conn, err := wsupgrader.Upgrade(c.Writer, c.Request, nil)
 		if err != nil {
 			c.JSON(500, gin.H{"error": "Failed to connect to websocket server"})
@@ -63,9 +63,9 @@ func main() {
 	})
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
-	routes.CategoryHandler(db, api)
-	routes.TagHandler(db, api)
-	routes.UserHandler(db, api)
+	routes.CategoryHandler(db, api, authMiddleware)
+	routes.TagHandler(db, api, authMiddleware)
+	routes.UserHandler(db, api, authMiddleware)
 	routes.AuthHandler(db, api, authMiddleware)
 	routes.EventHandler(db, api, authMiddleware)
 	routes.ExpenseHandler(db, api, authMiddleware)
