@@ -85,3 +85,15 @@ func ExpenseHandler(db *gorm.DB, route *gin.RouterGroup, middleware gin.HandlerF
 	route.PATCH("/expenses/:id", middleware, expenseController.UpdateExpense)
 	route.DELETE("/expenses/:id", middleware, expenseController.DeleteExpense)
 }
+
+func AchievementHandler(db *gorm.DB, route *gin.RouterGroup, middleware gin.HandlerFunc) {
+	achievementRepository := repositories.NewAchievementRepository(db)
+	achievementService := services.NewAchievementService(achievementRepository)
+	achievementController := controllers.NewAchievementController(achievementService)
+
+	route.GET("/achievements", middleware, achievementController.FindAchievements)
+	route.POST("/achievements", middleware, achievementController.CreateAchievement)
+	route.GET("/achievements/:id", middleware, achievementController.FindAchievement)
+	route.PATCH("/achievements/:id", middleware, achievementController.UpdateAchievement)
+	route.DELETE("/achievements/:id", middleware, achievementController.DeleteAchievement)
+}

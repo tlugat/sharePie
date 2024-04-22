@@ -59,18 +59,6 @@ func (service *EventService) Find() ([]models.Event, error) {
 		return nil, err
 	}
 
-	// Fetch category and author for each event
-	for i, event := range events {
-		category, err := service.CategoryRepository.FindOne(event.CategoryID)
-		author, err := service.UserRepository.FindOneById(event.AuthorID)
-
-		if err != nil {
-			return nil, err
-		}
-		events[i].Category = category
-		events[i].Author = author
-	}
-
 	return events, nil
 }
 
@@ -80,17 +68,6 @@ func (service *EventService) FindOne(id uint) (models.Event, error) {
 	if err != nil {
 		return models.Event{}, err
 	}
-	// Fetch event's category
-	category, err := service.CategoryRepository.FindOne(event.CategoryID)
-	// Fetch event's author
-	author, err := service.UserRepository.FindOneById(event.AuthorID)
-
-	if err != nil {
-		return models.Event{}, err
-	}
-
-	event.Category = category
-	event.Author = author
 
 	return event, nil
 

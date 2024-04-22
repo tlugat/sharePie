@@ -24,13 +24,13 @@ func NewEventRepository(db *gorm.DB) IEventRepository {
 
 func (r *EventRepository) Find() ([]models.Event, error) {
 	var events []models.Event
-	result := r.db.Find(&events)
+	result := r.db.Preload("Category").Preload("Author").Find(&events)
 	return events, result.Error
 }
 
 func (r *EventRepository) FindOne(id uint) (models.Event, error) {
 	var event models.Event
-	result := r.db.Where("id = ?", id).First(&event)
+	result := r.db.Preload("Category").Preload("Author").Where("id = ?", id).First(&event)
 	return event, result.Error
 }
 
