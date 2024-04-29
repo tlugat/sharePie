@@ -4,8 +4,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"sharePie-api/controllers"
+	"sharePie-api/middlewares"
 	"sharePie-api/repositories"
 	"sharePie-api/services"
+	"sharePie-api/utils"
 )
 
 func CategoryHandler(db *gorm.DB, route *gin.RouterGroup, middleware gin.HandlerFunc) {
@@ -14,10 +16,10 @@ func CategoryHandler(db *gorm.DB, route *gin.RouterGroup, middleware gin.Handler
 	categoryController := controllers.NewCategoryController(categoryService)
 
 	route.GET("/categories", middleware, categoryController.FindCategories)
-	route.POST("/categories", middleware, categoryController.CreateCategory)
+	route.POST("/categories", middleware, middlewares.AuthorizeRole(utils.AdminRole), categoryController.CreateCategory)
 	route.GET("/categories/:id", middleware, categoryController.FindCategory)
-	route.PATCH("/categories/:id", middleware, categoryController.UpdateCategory)
-	route.DELETE("/categories/:id", middleware, categoryController.DeleteCategory)
+	route.PATCH("/categories/:id", middleware, middlewares.AuthorizeRole(utils.AdminRole), categoryController.UpdateCategory)
+	route.DELETE("/categories/:id", middleware, middlewares.AuthorizeRole(utils.AdminRole), categoryController.DeleteCategory)
 }
 
 func TagHandler(db *gorm.DB, route *gin.RouterGroup, middleware gin.HandlerFunc) {
@@ -26,10 +28,10 @@ func TagHandler(db *gorm.DB, route *gin.RouterGroup, middleware gin.HandlerFunc)
 	tagController := controllers.NewTagController(tagService)
 
 	route.GET("/tags", middleware, tagController.FindTags)
-	route.POST("/tags", middleware, tagController.CreateTag)
+	route.POST("/tags", middleware, middlewares.AuthorizeRole(utils.AdminRole), tagController.CreateTag)
 	route.GET("/tags/:id", middleware, tagController.FindTag)
-	route.PATCH("/tags/:id", middleware, tagController.UpdateTag)
-	route.DELETE("/tags/:id", middleware, tagController.DeleteTag)
+	route.PATCH("/tags/:id", middleware, middlewares.AuthorizeRole(utils.AdminRole), tagController.UpdateTag)
+	route.DELETE("/tags/:id", middleware, middlewares.AuthorizeRole(utils.AdminRole), tagController.DeleteTag)
 }
 
 func UserHandler(db *gorm.DB, route *gin.RouterGroup, middleware gin.HandlerFunc) {
@@ -37,10 +39,10 @@ func UserHandler(db *gorm.DB, route *gin.RouterGroup, middleware gin.HandlerFunc
 	userService := services.NewUserService(userRepository)
 	userController := controllers.NewUserController(userService)
 
-	route.GET("/users", middleware, userController.FindUsers)
+	route.GET("/users", middleware, middlewares.AuthorizeRole(utils.AdminRole), userController.FindUsers)
 	route.GET("/users/:id", middleware, userController.FindUser)
 	route.PATCH("/users/:id", middleware, userController.UpdateUser)
-	route.DELETE("/users/:id", middleware, userController.DeleteUser)
+	route.DELETE("/users/:id", middleware, middlewares.AuthorizeRole(utils.AdminRole), userController.DeleteUser)
 }
 
 func AuthHandler(db *gorm.DB, route *gin.RouterGroup, middleware gin.HandlerFunc) {

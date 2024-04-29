@@ -3,6 +3,7 @@ package services
 import (
 	"sharePie-api/models"
 	"sharePie-api/repositories"
+	"sharePie-api/utils"
 )
 
 type CreateUserInput struct {
@@ -49,7 +50,7 @@ func (service *UserService) FindOneByEmail(email string) (models.User, error) {
 }
 
 func (service *UserService) Create(input CreateUserInput) (models.User, error) {
-	user := models.User{FirstName: input.FirstName, LastName: input.LastName, Username: input.Username, Email: input.Email, Password: input.Password}
+	user := models.User{FirstName: input.FirstName, LastName: input.LastName, Username: input.Username, Email: input.Email, Password: input.Password, Role: utils.UserRole}
 	return service.Repository.Create(user)
 }
 
