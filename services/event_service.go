@@ -74,11 +74,15 @@ func (service *EventService) FindOne(id uint) (models.Event, error) {
 }
 
 func (service *EventService) Create(input CreateEventInput, user models.User) (models.Event, error) {
+	image, err := UploadImage(input.Image, "Events")
+	if err != nil {
+		return models.Event{}, err
+	}
 	event := models.Event{
 		Name:        input.Name,
 		Description: input.Description,
 		CategoryID:  input.Category,
-		Image:       input.Image,
+		Image:       image,
 		Goal:        input.Goal,
 		AuthorID:    user.ID,
 		Code:        utils.GenerateInvitationCode(6),
@@ -104,7 +108,11 @@ func (service *EventService) Update(id uint, input UpdateEventInput) (models.Eve
 		event.CategoryID = input.Category
 	}
 	if input.Image != "" {
-		event.Image = input.Image
+		image, err := UploadImage(input.Image, "Events")
+		if err != nil {
+			return models.Event{}, err
+		}
+		event.Image = image
 	}
 	if input.Goal != 0 {
 		event.Goal = input.Goal

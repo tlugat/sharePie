@@ -71,12 +71,16 @@ func (service *ExpenseService) FindOne(id uint) (models.Expense, error) {
 }
 
 func (service *ExpenseService) Create(input CreateExpenseInput, user models.User) (models.Expense, error) {
+	image, err := UploadImage(input.Image, "Events")
+	if err != nil {
+		return models.Expense{}, err
+	}
 	expense := models.Expense{
 		Name:        input.Name,
 		Description: input.Description,
 		TagID:       input.Tag,
 		PayerID:     input.Payer,
-		Image:       input.Image,
+		Image:       image,
 		Amount:      input.Amount,
 		AuthorID:    user.ID,
 		EventID:     input.Event,
@@ -112,7 +116,11 @@ func (service *ExpenseService) Update(id uint, input UpdateExpenseInput) (models
 		expense.PayerID = input.Payer
 	}
 	if input.Image != "" {
-		expense.Image = input.Image
+		image, err := UploadImage(input.Image, "Events")
+		if err != nil {
+			return models.Expense{}, err
+		}
+		expense.Image = image
 	}
 	if input.Amount != 0 {
 		expense.Amount = input.Amount
