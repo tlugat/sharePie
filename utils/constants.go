@@ -3,6 +3,6 @@ package utils
 type Role string
 
 const (
-	UserRole  Role = "pending"
-	AdminRole Role = "approved"
+	UserRole  Role = "user"
+	AdminRole Role = "admin"
 )
