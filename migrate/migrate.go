@@ -1,14 +1,20 @@
 package main
 
 import (
+	"log"
 	"sharePie-api/configs"
 	"sharePie-api/models"
 )
 
 func main() {
 	configs.LoadEnv()
-	db := configs.ConnectDB()
-	err := db.AutoMigrate(
+	db, err := configs.ConnectDB()
+
+	if err != nil {
+		log.Fatalf("Failed to connect to database : %v", err)
+	}
+
+	err = db.AutoMigrate(
 		&models.User{},
 		&models.Tag{},
 		&models.Category{},
@@ -17,7 +23,6 @@ func main() {
 		&models.Event{},
 	)
 	if err != nil {
-		panic(err)
-		return
+		log.Fatalf("Failed to migrate database : %v", err)
 	}
 }
