@@ -30,6 +30,8 @@ func main() {
 	configs.LoadEnv()
 	db := configs.ConnectDB()
 
+	configs.InitializeCloudinary()
+
 	r := gin.Default()
 
 	authMiddleware := middlewares.RequireAuth(db)
