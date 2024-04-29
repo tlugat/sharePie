@@ -6,14 +6,10 @@ import (
 	"os"
 )
 
-func ConnectDB() *gorm.DB {
+func ConnectDB() (*gorm.DB, error) {
 	dbUrl := os.Getenv("DATABASE_URL")
 
 	db, err := gorm.Open(postgres.Open(dbUrl), &gorm.Config{})
 
-	if err != nil {
-		panic("Failed to connect to db!")
-	}
-
-	return db
+	return db, err
 }

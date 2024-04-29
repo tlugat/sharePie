@@ -1,17 +1,25 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
 	"sharePie-api/configs"
 	_ "sharePie-api/docs"
 	"sharePie-api/middlewares"
 	"sharePie-api/routes"
 	"sharePie-api/ws"
+	"syscall"
+	"time"
 )
 
 var wsupgrader = websocket.Upgrader{
@@ -28,7 +36,11 @@ var wsupgrader = websocket.Upgrader{
 // @query.collection.format multi
 func main() {
 	configs.LoadEnv()
-	db := configs.ConnectDB()
+	db, err := configs.ConnectDB()
+
+	if err != nil {
+		log.Fatalf("Failed to connect to database : %v", err)
+	}
 
 	configs.InitializeCloudinary()
 
@@ -73,9 +85,39 @@ func main() {
 	routes.ExpenseHandler(db, api, authMiddleware)
 	routes.AchievementHandler(db, api, authMiddleware)
 
-	err := r.Run()
-
-	if err != nil {
-		return
+	srv := &http.Server{
+		Addr:    ":8080",
+		Handler: r,
 	}
+
+	go func() {
+		// service connections
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatalf("listen: %s\n", err)
+		} else if err == nil {
+			log.Println("Server started on port 8080")
+		}
+	}()
+
+	// Wait for interrupt signal to gracefully shutdown the server with
+	// a timeout of 5 seconds.
+	quit := make(chan os.Signal)
+	// kill (no param) default send syscanll.SIGTERM
+	// kill -2 is syscall.SIGINT
+	// kill -9 is syscall. SIGKILL but can"t be catch, so don't need add it
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	log.Println("Shutdown Server ...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatal("Server Shutdown:", err)
+	}
+	// catching ctx.Done(). timeout of 5 seconds.
+	select {
+	case <-ctx.Done():
+		log.Println("timeout of 5 seconds.")
+	}
+	log.Println("Server exiting")
 }
