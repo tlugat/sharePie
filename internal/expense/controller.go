@@ -4,14 +4,15 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"sharePie-api/internal/auth"
+	"sharePie-api/internal/types"
 	"strconv"
 )
 
 type Controller struct {
-	expenseService IExpenseService
+	expenseService types.IExpenseService
 }
 
-func NewController(service IExpenseService) *Controller {
+func NewController(service types.IExpenseService) *Controller {
 	return &Controller{expenseService: service}
 }
 
@@ -64,7 +65,7 @@ func (controller *Controller) FindExpense(c *gin.Context) {
 // @Failure 400 {object} map[string]interface{} "Returns an error if the input is invalid or user authentication fails"
 // @Router /expenses [post]
 func (controller *Controller) CreateExpense(c *gin.Context) {
-	var input CreateExpenseInput
+	var input types.CreateExpenseInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -97,7 +98,7 @@ func (controller *Controller) CreateExpense(c *gin.Context) {
 // @Router /expenses/{id} [put]
 func (controller *Controller) UpdateExpense(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	var input UpdateExpenseInput
+	var input types.UpdateExpenseInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

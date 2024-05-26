@@ -25,6 +25,9 @@ func main() {
 		&models.Expense{},
 		&models.Tag{},
 		&models.Event{},
+		&models.Participant{},
+		&models.Payer{},
+		&models.Achievement{},
 	)
 	if err != nil {
 		log.Fatalf("Failed to migrate database : %v", err)

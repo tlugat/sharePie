@@ -1,8 +1,8 @@
 package event
 
 import (
-	"sharePie-api/internal/expense"
 	models2 "sharePie-api/internal/models"
+	"sharePie-api/internal/types"
 	"sharePie-api/internal/user"
 )
 
@@ -23,14 +23,14 @@ type IEventBalanceService interface {
 }
 
 type BalanceService struct {
-	EventRepository   IEventRepository
-	ExpenseRepository expense.IExpenseRepository
+	EventRepository   types.IEventRepository
+	ExpenseRepository types.IExpenseRepository
 	UserRepository    user.IUserRepository
 }
 
 func NewBalanceService(
-	eventRepository IEventRepository,
-	expenseRepository expense.IExpenseRepository,
+	eventRepository types.IEventRepository,
+	expenseRepository types.IExpenseRepository,
 	userRepository user.IUserRepository,
 ) IEventBalanceService {
 	return &BalanceService{
@@ -46,7 +46,7 @@ func (service *BalanceService) GetBalanceSummary(event models2.Event) ([]Balance
 		return nil, err
 	}
 
-	eventUsers, err := service.UserRepository.FindByEventId(event.ID)
+	eventUsers, err := service.EventRepository.FindUsers(event.ID)
 
 	if err != nil {
 		return nil, err
@@ -69,17 +69,11 @@ func (service *BalanceService) GetBalanceSummary(event models2.Event) ([]Balance
 
 	for _, eventExpense := range expenses {
 		total += eventExpense.Amount
-		isUserConcerned := isUserConcerned(eventExpense.Users, eventExpense.PayerID)
-
-		if !isUserConcerned {
-			userBalances[eventExpense.PayerID] += eventExpense.Amount
+		for _, participant := range eventExpense.Participants {
+			userBalances[participant.UserID] -= participant.Amount
 		}
-		for _, eventUser := range eventExpense.Users {
-			if eventExpense.PayerID == eventUser.ID {
-				userBalances[eventUser.ID] += eventExpense.Amount - (eventExpense.Amount / float64(len(eventExpense.Users)))
-				continue
-			}
-			userBalances[eventUser.ID] -= eventExpense.Amount / float64(len(eventExpense.Users))
+		for _, payer := range eventExpense.Payers {
+			userBalances[payer.UserID] += payer.Amount
 		}
 	}
 
@@ -93,13 +87,4 @@ func (service *BalanceService) GetBalanceSummary(event models2.Event) ([]Balance
 	}
 
 	return summaries, nil
-}
-
-func isUserConcerned(users []models2.User, userID uint) bool {
-	for _, eventUser := range users {
-		if eventUser.ID == userID {
-			return true
-		}
-	}
-	return false
 }

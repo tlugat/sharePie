@@ -3,53 +3,27 @@ package event
 import (
 	"math/rand"
 	"sharePie-api/internal/category"
-	"sharePie-api/internal/expense"
 	models2 "sharePie-api/internal/models"
+	"sharePie-api/internal/types"
 	"sharePie-api/internal/user"
 	"sharePie-api/pkg/config/thirdparty/cloudinary"
 	"strings"
 	"time"
 )
 
-type CreateEventInput struct {
-	Name        string  `json:"name" binding:"required"`
-	Description string  `json:"description" binding:"required"`
-	Category    uint    `json:"category"`
-	Image       string  `json:"image"`
-	Goal        float64 `json:"goal"`
-}
-
-type UpdateEventInput struct {
-	Name        string  `json:"name"`
-	Description string  `json:"description"`
-	Category    uint    `json:"category"`
-	Image       string  `json:"image"`
-	Goal        float64 `json:"goal"`
-}
-
-type IEventService interface {
-	Find() ([]models2.Event, error)
-	FindOne(id uint) (models2.Event, error)
-	Create(input CreateEventInput, user models2.User) (models2.Event, error)
-	Update(id uint, input UpdateEventInput) (models2.Event, error)
-	Delete(id uint) error
-	GetUsers(id uint) ([]models2.User, error)
-	AddUser(code string, user models2.User) error
-}
-
 type Service struct {
-	Repository         IEventRepository
+	Repository         types.IEventRepository
 	CategoryRepository category.ICategoryRepository
 	UserRepository     user.IUserRepository
-	ExpenseRepository  expense.IExpenseRepository
+	ExpenseRepository  types.IExpenseRepository
 }
 
 func NewService(
-	repository IEventRepository,
+	repository types.IEventRepository,
 	categoryRepository category.ICategoryRepository,
 	userRepository user.IUserRepository,
-	expenseRepository expense.IExpenseRepository,
-) IEventService {
+	expenseRepository types.IExpenseRepository,
+) types.IEventService {
 	return &Service{
 		Repository:         repository,
 		CategoryRepository: categoryRepository,
@@ -78,25 +52,28 @@ func (service *Service) FindOne(id uint) (models2.Event, error) {
 
 }
 
-func (service *Service) Create(input CreateEventInput, user models2.User) (models2.Event, error) {
-	image, err := cloudinary.UploadImage(input.Image, "Events")
-	if err != nil {
-		return models2.Event{}, err
-	}
+func (service *Service) Create(input types.CreateEventInput, user models2.User) (models2.Event, error) {
 	event := models2.Event{
 		Name:        input.Name,
 		Description: input.Description,
 		CategoryID:  input.Category,
-		Image:       image,
 		Goal:        input.Goal,
 		AuthorID:    user.ID,
 		Code:        generateInvitationCode(6),
+		Users:       []models2.User{user},
+	}
+	if input.Image != "" {
+		image, err := cloudinary.UploadImage(input.Image, "Events")
+		if err != nil {
+			return models2.Event{}, err
+		}
+		event.Image = image
 	}
 
 	return service.Repository.Create(event)
 }
 
-func (service *Service) Update(id uint, input UpdateEventInput) (models2.Event, error) {
+func (service *Service) Update(id uint, input types.UpdateEventInput) (models2.Event, error) {
 	event, err := service.Repository.FindOne(id)
 
 	if err != nil {
