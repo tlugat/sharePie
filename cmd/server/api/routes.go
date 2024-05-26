@@ -9,6 +9,8 @@ import (
 	"sharePie-api/internal/category"
 	"sharePie-api/internal/event"
 	"sharePie-api/internal/expense"
+	"sharePie-api/internal/participant"
+	"sharePie-api/internal/payer"
 	"sharePie-api/internal/tag"
 	"sharePie-api/internal/user"
 	"sharePie-api/pkg/constants"
@@ -82,7 +84,16 @@ func ExpenseHandler(db *gorm.DB, route *gin.RouterGroup) {
 	expenseRepository := expense.NewRepository(db)
 	tagRepository := tag.NewRepository(db)
 	userRepository := user.NewRepository(db)
-	expenseService := expense.NewService(expenseRepository, tagRepository, userRepository)
+	participantRepository := participant.NewRepository(db)
+	payerRepository := payer.NewRepository(db)
+	eventRepository := event.NewRepository(db)
+	expenseService := expense.NewService(
+		expenseRepository,
+		tagRepository,
+		userRepository,
+		participantRepository,
+		payerRepository,
+		eventRepository)
 	expenseController := expense.NewController(expenseService)
 
 	route.GET("/expenses", middleware.IsAuthenticated(db), expenseController.FindExpenses)

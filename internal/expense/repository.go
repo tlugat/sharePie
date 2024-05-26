@@ -4,22 +4,14 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"sharePie-api/internal/models"
+	"sharePie-api/internal/types"
 )
-
-type IExpenseRepository interface {
-	Find() ([]models.Expense, error)
-	FindByEventId(id uint) ([]models.Expense, error)
-	FindOne(id uint) (models.Expense, error)
-	Create(expense models.Expense) (models.Expense, error)
-	Update(expense models.Expense) (models.Expense, error)
-	Delete(id uint) error
-}
 
 type Repository struct {
 	db *gorm.DB
 }
 
-func NewRepository(db *gorm.DB) IExpenseRepository {
+func NewRepository(db *gorm.DB) types.IExpenseRepository {
 	return &Repository{db: db}
 }
 
@@ -42,7 +34,7 @@ func (r *Repository) FindOne(id uint) (models.Expense, error) {
 }
 
 func (r *Repository) Create(expense models.Expense) (models.Expense, error) {
-	result := r.db.Create(&expense)
+	result := r.db.Session(&gorm.Session{FullSaveAssociations: true}).Create(&expense)
 	return expense, result.Error
 }
 

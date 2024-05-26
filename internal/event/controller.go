@@ -4,19 +4,16 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"sharePie-api/internal/auth"
+	"sharePie-api/internal/types"
 	"strconv"
 )
 
-type JoinEventInput struct {
-	Code string `json:"code" binding:"required"`
-}
-
 type Controller struct {
-	eventService   IEventService
+	eventService   types.IEventService
 	balanceService IEventBalanceService
 }
 
-func NewController(service IEventService, balanceService IEventBalanceService) *Controller {
+func NewController(service types.IEventService, balanceService IEventBalanceService) *Controller {
 	return &Controller{eventService: service, balanceService: balanceService}
 }
 
@@ -69,7 +66,7 @@ func (controller *Controller) FindEvent(c *gin.Context) {
 // @Failure 400 {object} map[string]interface{} "Returns an error if the input is invalid or user authentication fails"
 // @Router /events [post]
 func (controller *Controller) CreateEvent(c *gin.Context) {
-	var input CreateEventInput
+	var input types.CreateEventInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -102,7 +99,7 @@ func (controller *Controller) CreateEvent(c *gin.Context) {
 // @Router /events/{id} [put]
 func (controller *Controller) UpdateEvent(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	var input UpdateEventInput
+	var input types.UpdateEventInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -187,7 +184,7 @@ func (controller *Controller) GetEventBalanceSummary(c *gin.Context) {
 
 func (controller *Controller) JoinEvent(c *gin.Context) {
 
-	var input JoinEventInput
+	var input types.JoinEventInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
