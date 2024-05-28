@@ -2,11 +2,8 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/websocket"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"log"
@@ -18,16 +15,12 @@ import (
 	"sharePie-api/internal/auth/middleware"
 	"sharePie-api/pkg/config/database"
 	"sharePie-api/pkg/config/env"
-	"sharePie-api/pkg/config/thirdparty"
 	"sharePie-api/pkg/config/thirdparty/cloudinary"
+	websocket2 "sharePie-api/pkg/config/thirdparty/websocket"
+	"strconv"
 	"syscall"
 	"time"
 )
-
-var wsupgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-}
 
 // @title SharePie API
 // @version 1.0
@@ -56,34 +49,16 @@ func main() {
 
 	api := r.Group("api/v1")
 
-	api.GET("/ws", middleware.IsAuthenticated(db), func(c *gin.Context) {
-		conn, err := wsupgrader.Upgrade(c.Writer, c.Request, nil)
-		if err != nil {
-			c.JSON(500, gin.H{"error": "Failed to connect to websocket server"})
+	hub := websocket2.NewHub(db)
+	go hub.Run()
+
+	api.GET("/ws/event/:eventId", middleware.IsAuthenticated(db), func(c *gin.Context) {
+		room := c.Param("eventId")
+		if _, err := strconv.ParseUint(room, 10, 32); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid eventId"})
 			return
 		}
-		defer conn.Close()
-
-		// Parse query parameters
-		queryParams := c.Request.URL.Query()
-
-		for {
-			_, msg, err := conn.ReadMessage()
-			if err != nil {
-				if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-					fmt.Printf("error: %v", err)
-				}
-				break
-			}
-
-			var event thirdparty.Event
-			if err := json.Unmarshal(msg, &event); err != nil {
-				fmt.Println("Error unmarshalling event:", err)
-				continue
-			}
-
-			thirdparty.HandleWebsocketEvent(conn, event, db, queryParams)
-		}
+		websocket2.ServeWs(hub, room, c.Writer, c.Request)
 	})
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
