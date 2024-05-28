@@ -46,6 +46,7 @@ type UpdateEventInput struct {
 	Category    uint    `json:"category"`
 	Image       string  `json:"image"`
 	Goal        float64 `json:"goal"`
+	Users       []uint  `json:"users"`
 }
 
 type JoinEventInput struct {
