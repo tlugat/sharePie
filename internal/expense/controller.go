@@ -77,7 +77,7 @@ func (controller *Controller) CreateExpense(c *gin.Context) {
 		return
 	}
 
-	expense, err := controller.expenseService.Create(input, *user)
+	expense, err := controller.expenseService.Create(input, user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

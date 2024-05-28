@@ -23,7 +23,7 @@ type Service struct {
 
 func NewService(
 	repository types.IExpenseRepository,
-	categoryRepository tag.ITagRepository,
+	tagRepository tag.ITagRepository,
 	userRepository user.IUserRepository,
 	participantRepository participant.IParticipantRepository,
 	payerRepository payer.IPayerRepository,
@@ -31,7 +31,7 @@ func NewService(
 ) types.IExpenseService {
 	return &Service{
 		Repository:            repository,
-		TagRepository:         categoryRepository,
+		TagRepository:         tagRepository,
 		UserRepository:        userRepository,
 		ParticipantRepository: participantRepository,
 		PayerRepository:       payerRepository,
@@ -56,6 +56,15 @@ func (service *Service) FindOne(id uint) (models2.Expense, error) {
 	}
 
 	return expense, nil
+}
+
+func (service *Service) FindByEventId(id uint) ([]models2.Expense, error) {
+	expenses, err := service.Repository.FindByEventId(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return expenses, nil
 }
 
 func (service *Service) Create(input types.CreateExpenseInput, user models2.User) (models2.Expense, error) {

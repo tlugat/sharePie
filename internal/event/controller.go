@@ -77,7 +77,7 @@ func (controller *Controller) CreateEvent(c *gin.Context) {
 		return
 	}
 
-	event, err := controller.eventService.Create(input, *user)
+	event, err := controller.eventService.Create(input, user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -282,7 +282,7 @@ func (controller *Controller) JoinEvent(c *gin.Context) {
 		return
 	}
 
-	err := controller.eventService.AddUser(input.Code, *user)
+	err := controller.eventService.AddUser(input.Code, user)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

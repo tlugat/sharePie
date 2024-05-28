@@ -17,6 +17,7 @@ type IExpenseService interface {
 	Create(input CreateExpenseInput, user models.User) (models.Expense, error)
 	Update(id uint, input UpdateExpenseInput) (models.Expense, error)
 	Delete(id uint) error
+	FindByEventId(id uint) ([]models.Expense, error)
 }
 
 type ParticipantInput struct {
@@ -47,4 +48,5 @@ type UpdateExpenseInput struct {
 	Participants []ParticipantInput `json:"participants"`
 	Payers       []PayerInput       `json:"payers"`
 	Amount       float64            `json:"amount"`
+	ID           uint               `json:"id"`
 }
