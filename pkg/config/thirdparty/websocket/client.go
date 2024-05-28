@@ -116,36 +116,14 @@ func (c *Client) handleCreateExpense(payload json.RawMessage) {
 		fmt.Println("Failed to unmarshal data:", err)
 		return
 	}
-	eventId, err := strconv.ParseUint(c.room, 10, 32)
-	if err != nil {
-		fmt.Println("Invalid eventId:", err)
-		return
-	}
 
-	_, err = c.hub.expenseService.Create(input, c.user)
+	_, err := c.hub.expenseService.Create(input, c.user)
 	if err != nil {
 		fmt.Println("Failed to create expense:", err)
 		return
 	}
 
-	updatedExpenses, err := c.hub.expenseService.FindByEventId(uint(eventId))
-
-	expensesJSON, err := json.Marshal(updatedExpenses)
-	if err != nil {
-		fmt.Println("Failed to marshal expenses:", err)
-		return
-	}
-
-	message, err := json.Marshal(Message{
-		Type:    "expenses",
-		Payload: expensesJSON,
-	})
-	if err != nil {
-		fmt.Println("Failed to marshal expenses message:", err)
-		return
-	}
-
-	c.hub.rooms[c.room].broadcast <- message
+	c.refreshExpenses()
 }
 
 func (c *Client) handleUpdateExpense(payload json.RawMessage) {
@@ -154,36 +132,14 @@ func (c *Client) handleUpdateExpense(payload json.RawMessage) {
 		fmt.Println("Failed to unmarshal data:", err)
 		return
 	}
-	eventId, err := strconv.ParseUint(c.room, 10, 32)
-	if err != nil {
-		fmt.Println("Invalid eventId:", err)
-		return
-	}
 
-	_, err = c.hub.expenseService.Update(input.ID, input)
+	_, err := c.hub.expenseService.Update(input.ID, input)
 	if err != nil {
 		fmt.Println("Failed to update expense:", err)
 		return
 	}
 
-	updatedExpenses, err := c.hub.expenseService.FindByEventId(uint(eventId))
-
-	expensesJSON, err := json.Marshal(updatedExpenses)
-	if err != nil {
-		fmt.Println("Failed to marshal expenses:", err)
-		return
-	}
-
-	message, err := json.Marshal(Message{
-		Type:    "expenses",
-		Payload: expensesJSON,
-	})
-	if err != nil {
-		fmt.Println("Failed to marshal expenses message:", err)
-		return
-	}
-
-	c.hub.rooms[c.room].broadcast <- message
+	c.refreshExpenses()
 }
 
 func (c *Client) handleDeleteExpense(payload json.RawMessage) {
@@ -192,21 +148,30 @@ func (c *Client) handleDeleteExpense(payload json.RawMessage) {
 		fmt.Println("Failed to unmarshal data:", err)
 		return
 	}
+
+	err := c.hub.expenseService.Delete(input.ID)
+	if err != nil {
+		fmt.Println("Failed to delete expense:", err)
+		return
+	}
+
+	c.refreshExpenses()
+}
+
+func (c *Client) refreshExpenses() {
 	eventId, err := strconv.ParseUint(c.room, 10, 32)
 	if err != nil {
 		fmt.Println("Invalid eventId:", err)
 		return
 	}
 
-	err = c.hub.expenseService.Delete(input.ID)
+	expenses, err := c.hub.expenseService.FindByEventId(uint(eventId))
 	if err != nil {
-		fmt.Println("Failed to delete expense:", err)
+		fmt.Println("Failed to get expenses:", err)
 		return
 	}
 
-	updatedExpenses, err := c.hub.expenseService.FindByEventId(uint(eventId))
-
-	expensesJSON, err := json.Marshal(updatedExpenses)
+	expensesJSON, err := json.Marshal(expenses)
 	if err != nil {
 		fmt.Println("Failed to marshal expenses:", err)
 		return
@@ -218,6 +183,64 @@ func (c *Client) handleDeleteExpense(payload json.RawMessage) {
 	})
 	if err != nil {
 		fmt.Println("Failed to marshal expenses message:", err)
+		return
+	}
+
+	event, err := c.hub.eventService.FindOne(uint(eventId))
+	if err != nil {
+		fmt.Println("Failed to get event:", err)
+		return
+	}
+
+	c.hub.rooms[c.room].broadcast <- message
+	c.refreshBalances(event)
+	c.refreshTransactions(event)
+}
+
+func (c *Client) refreshBalances(event models.Event) {
+	balances, err := c.hub.eventService.GetBalances(event)
+	if err != nil {
+		fmt.Println("Failed to get balances:", err)
+		return
+	}
+
+	balancesJSON, err := json.Marshal(balances)
+	if err != nil {
+		fmt.Println("Failed to marshal balances:", err)
+		return
+	}
+
+	message, err := json.Marshal(Message{
+		Type:    "balances",
+		Payload: balancesJSON,
+	})
+	if err != nil {
+		fmt.Println("Failed to marshal balances message:", err)
+		return
+	}
+
+	c.hub.rooms[c.room].broadcast <- message
+}
+
+func (c *Client) refreshTransactions(event models.Event) {
+	transactions, err := c.hub.eventService.CreateTransactions(event)
+	if err != nil {
+		fmt.Println("Failed to create transactions:", err)
+		return
+	}
+
+	transactionsJSON, err := json.Marshal(transactions)
+	if err != nil {
+		fmt.Println("Failed to marshal transactions:", err)
+		return
+	}
+
+	message, err := json.Marshal(Message{
+		Type:    "transactions",
+		Payload: transactionsJSON,
+	})
+	if err != nil {
+		fmt.Println("Failed to marshal transactions message:", err)
 		return
 	}
 
