@@ -60,3 +60,35 @@ func (r *Repository) FindUsers(id uint) ([]models.User, error) {
 	}
 	return users, nil
 }
+
+func (r *Repository) CreateBalances(balances []models.Balance) error {
+	result := r.db.Create(&balances)
+	return result.Error
+}
+
+func (r *Repository) CreateTransactions(transactions []models.Transaction) error {
+	result := r.db.Create(&transactions)
+	return result.Error
+}
+
+func (r *Repository) FindBalances(event models.Event) ([]models.Balance, error) {
+	var balances []models.Balance
+	result := r.db.Preload("User").Where("event_id = ?", event.ID).Find(&balances)
+	return balances, result.Error
+}
+
+func (r *Repository) FindTransactions(event models.Event) ([]models.Transaction, error) {
+	var transactions []models.Transaction
+	result := r.db.Preload("From").Preload("To").Where("event_id = ?", event.ID).Find(&transactions)
+	return transactions, result.Error
+}
+
+func (r *Repository) DeleteBalances(event models.Event) error {
+	result := r.db.Where("event_id = ?", event.ID).Delete(&models.Balance{})
+	return result.Error
+}
+
+func (r *Repository) DeleteTransactions(event models.Event) error {
+	result := r.db.Where("event_id = ?", event.ID).Delete(&models.Transaction{})
+	return result.Error
+}

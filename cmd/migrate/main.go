@@ -28,6 +28,8 @@ func main() {
 		&models.Participant{},
 		&models.Payer{},
 		&models.Achievement{},
+		&models.Balance{},
+		&models.Transaction{},
 	)
 	if err != nil {
 		log.Fatalf("Failed to migrate database : %v", err)
