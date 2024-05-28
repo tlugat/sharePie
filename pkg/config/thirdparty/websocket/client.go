@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	"log"
+	"sharePie-api/internal/models"
 	"sharePie-api/internal/types"
 	"strconv"
 	"time"
@@ -15,6 +16,7 @@ type Client struct {
 	conn *websocket.Conn
 	room string
 	send chan []byte
+	user models.User
 }
 
 func (c *Client) readPump() {
@@ -61,6 +63,12 @@ func (c *Client) handleMessage(message Message) {
 	switch message.Type {
 	case "updateEvent":
 		c.handleUpdateEvent(message.Payload)
+	case "createExpense":
+		c.handleCreateExpense(message.Payload)
+	case "updateExpense":
+		c.handleUpdateExpense(message.Payload)
+	case "deleteExpense":
+		c.handleDeleteExpense(message.Payload)
 	default:
 		log.Println("unknown event type:", message.Type)
 	}
@@ -96,6 +104,120 @@ func (c *Client) handleUpdateEvent(payload json.RawMessage) {
 	})
 	if err != nil {
 		fmt.Println("Failed to marshal updated event:", err)
+		return
+	}
+
+	c.hub.rooms[c.room].broadcast <- message
+}
+
+func (c *Client) handleCreateExpense(payload json.RawMessage) {
+	var input types.CreateExpenseInput
+	if err := json.Unmarshal(payload, &input); err != nil {
+		fmt.Println("Failed to unmarshal data:", err)
+		return
+	}
+	eventId, err := strconv.ParseUint(c.room, 10, 32)
+	if err != nil {
+		fmt.Println("Invalid eventId:", err)
+		return
+	}
+
+	_, err = c.hub.expenseService.Create(input, c.user)
+	if err != nil {
+		fmt.Println("Failed to create expense:", err)
+		return
+	}
+
+	updatedExpenses, err := c.hub.expenseService.FindByEventId(uint(eventId))
+
+	expensesJSON, err := json.Marshal(updatedExpenses)
+	if err != nil {
+		fmt.Println("Failed to marshal expenses:", err)
+		return
+	}
+
+	message, err := json.Marshal(Message{
+		Type:    "expenses",
+		Payload: expensesJSON,
+	})
+	if err != nil {
+		fmt.Println("Failed to marshal expenses message:", err)
+		return
+	}
+
+	c.hub.rooms[c.room].broadcast <- message
+}
+
+func (c *Client) handleUpdateExpense(payload json.RawMessage) {
+	var input types.UpdateExpenseInput
+	if err := json.Unmarshal(payload, &input); err != nil {
+		fmt.Println("Failed to unmarshal data:", err)
+		return
+	}
+	eventId, err := strconv.ParseUint(c.room, 10, 32)
+	if err != nil {
+		fmt.Println("Invalid eventId:", err)
+		return
+	}
+
+	_, err = c.hub.expenseService.Update(input.ID, input)
+	if err != nil {
+		fmt.Println("Failed to update expense:", err)
+		return
+	}
+
+	updatedExpenses, err := c.hub.expenseService.FindByEventId(uint(eventId))
+
+	expensesJSON, err := json.Marshal(updatedExpenses)
+	if err != nil {
+		fmt.Println("Failed to marshal expenses:", err)
+		return
+	}
+
+	message, err := json.Marshal(Message{
+		Type:    "expenses",
+		Payload: expensesJSON,
+	})
+	if err != nil {
+		fmt.Println("Failed to marshal expenses message:", err)
+		return
+	}
+
+	c.hub.rooms[c.room].broadcast <- message
+}
+
+func (c *Client) handleDeleteExpense(payload json.RawMessage) {
+	var input DeleteExpenseInput
+	if err := json.Unmarshal(payload, &input); err != nil {
+		fmt.Println("Failed to unmarshal data:", err)
+		return
+	}
+	eventId, err := strconv.ParseUint(c.room, 10, 32)
+	if err != nil {
+		fmt.Println("Invalid eventId:", err)
+		return
+	}
+
+	err = c.hub.expenseService.Delete(input.ID)
+	if err != nil {
+		fmt.Println("Failed to delete expense:", err)
+		return
+	}
+
+	updatedExpenses, err := c.hub.expenseService.FindByEventId(uint(eventId))
+
+	expensesJSON, err := json.Marshal(updatedExpenses)
+	if err != nil {
+		fmt.Println("Failed to marshal expenses:", err)
+		return
+	}
+
+	message, err := json.Marshal(Message{
+		Type:    "expenses",
+		Payload: expensesJSON,
+	})
+	if err != nil {
+		fmt.Println("Failed to marshal expenses message:", err)
 		return
 	}
 

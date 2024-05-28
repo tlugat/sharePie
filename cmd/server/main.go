@@ -58,7 +58,8 @@ func main() {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid eventId"})
 			return
 		}
-		websocket2.ServeWs(hub, room, c.Writer, c.Request)
+
+		websocket2.ServeWs(hub, room, c)
 	})
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
