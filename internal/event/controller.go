@@ -9,12 +9,11 @@ import (
 )
 
 type Controller struct {
-	eventService   types.IEventService
-	balanceService IEventBalanceService
+	eventService types.IEventService
 }
 
-func NewController(service types.IEventService, balanceService IEventBalanceService) *Controller {
-	return &Controller{eventService: service, balanceService: balanceService}
+func NewController(service types.IEventService) *Controller {
+	return &Controller{eventService: service}
 }
 
 // FindEvents retrieves all events.
@@ -153,9 +152,9 @@ func (controller *Controller) GetEventUsers(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": users})
 }
 
-// GetEventBalanceSummary retrieves a summary of balances for an event.
-// @Summary Get event balance summary
-// @Description Retrieves a summary of balances for a specified event
+// CreateEventBalances create balances for an event.
+// @Summary Create event balances
+// @Description Create balances for a specified event
 // @Tags Events
 // @Accept  json
 // @Produce  json
@@ -163,7 +162,7 @@ func (controller *Controller) GetEventUsers(c *gin.Context) {
 // @Success 200 {object} map[string]interface{} "Returns a list of balances for the event"
 // @Failure 400 {object} map[string]interface{} "Returns an error if the event does not exist"
 // @Router /events/{id}/summary [get]
-func (controller *Controller) GetEventBalanceSummary(c *gin.Context) {
+func (controller *Controller) CreateEventBalances(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	event, err := controller.eventService.FindOne(uint(id))
 
@@ -172,7 +171,7 @@ func (controller *Controller) GetEventBalanceSummary(c *gin.Context) {
 		return
 	}
 
-	balanceSummary, err := controller.balanceService.GetBalanceSummary(event)
+	balanceSummary, err := controller.eventService.CreateBalances(event)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -180,6 +179,93 @@ func (controller *Controller) GetEventBalanceSummary(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": balanceSummary})
+}
+
+// GetEventBalances retrieves a list of balances for an event.
+// @Summary Get event balance list
+// @Description Retrieves a summary of balances for a specified event
+// @Tags Events
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Event ID"
+// @Success 200 {object} map[string]interface{} "Returns a list of balances for the event"
+// @Failure 400 {object} map[string]interface{} "Returns an error if the event does not exist"
+// @Router /events/{id}/summary [get]
+func (controller *Controller) GetEventBalances(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	event, err := controller.eventService.FindOne(uint(id))
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Event not found!"})
+		return
+	}
+
+	balanceSummary, err := controller.eventService.GetBalances(event)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": balanceSummary})
+}
+
+// CreateEventTransactions Create a list of transactions for an event.
+// // @Summary Create event transactions
+// // @Description Create a list of transactions for a specified event
+// // @Tags Events
+// // @Accept  json
+// // @Produce  json
+// // @Param id path int true "Event ID"
+// // @Success 200 {object} map[string]interface{} "Returns a list of transactions for the event"
+// // @Failure 400 {object} map[string]interface{} "Returns an error if the event does not exist"
+// // @Router /events/{id}/transactions [get]
+func (controller *Controller) CreateEventTransactions(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	event, err := controller.eventService.FindOne(uint(id))
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Event not found!"})
+		return
+	}
+
+	transactions, err := controller.eventService.CreateTransactions(event)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": transactions})
+}
+
+// GetEventTransactions retrieves a list of transactions for an event.
+// // @Summary Get event transactions
+// // @Description Retrieves a list of transactions for a specified event
+// // @Tags Events
+// // @Accept  json
+// // @Produce  json
+// // @Param id path int true "Event ID"
+// // @Success 200 {object} map[string]interface{} "Returns a list of transactions for the event"
+// // @Failure 400 {object} map[string]interface{} "Returns an error if the event does not exist"
+// // @Router /events/{id}/transactions [get]
+func (controller *Controller) GetEventTransactions(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	event, err := controller.eventService.FindOne(uint(id))
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Event not found!"})
+		return
+	}
+
+	transactions, err := controller.eventService.GetTransactions(event)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": transactions})
 }
 
 func (controller *Controller) JoinEvent(c *gin.Context) {

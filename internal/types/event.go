@@ -10,6 +10,12 @@ type IEventRepository interface {
 	Delete(id uint) error
 	FindOneByCode(code string) (models.Event, error)
 	FindUsers(id uint) ([]models.User, error)
+	CreateBalances(balances []models.Balance) error
+	CreateTransactions(transactions []models.Transaction) error
+	FindBalances(event models.Event) ([]models.Balance, error)
+	FindTransactions(event models.Event) ([]models.Transaction, error)
+	DeleteBalances(event models.Event) error
+	DeleteTransactions(event models.Event) error
 }
 
 type IEventService interface {
@@ -20,6 +26,10 @@ type IEventService interface {
 	Delete(id uint) error
 	GetUsers(id uint) ([]models.User, error)
 	AddUser(code string, user models.User) error
+	CreateBalances(event models.Event) ([]models.Balance, error)
+	CreateTransactions(event models.Event) ([]models.Transaction, error)
+	GetBalances(event models.Event) ([]models.Balance, error)
+	GetTransactions(event models.Event) ([]models.Transaction, error)
 }
 
 type CreateEventInput struct {
@@ -40,4 +50,17 @@ type UpdateEventInput struct {
 
 type JoinEventInput struct {
 	Code string `json:"code" binding:"required"`
+}
+
+type BalanceUser struct {
+	ID        uint   `json:"id"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+	Username  string `json:"username"`
+}
+
+type Transaction struct {
+	From   BalanceUser `json:"from"`
+	To     BalanceUser `json:"to"`
+	Amount float64     `json:"amount"`
 }

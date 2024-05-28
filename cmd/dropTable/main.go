@@ -23,6 +23,8 @@ var tableModels = map[string]interface{}{
 	"participants":      &models.Participant{},
 	"payers":            &models.Payer{},
 	"achievements":      &models.Achievement{},
+	"balances":          &models.Balance{},
+	"transactions":      &models.Transaction{},
 	"expense_users":     "expense_users",
 	"event_users":       "event_users",
 	"user_achievements": "user_achievements",
