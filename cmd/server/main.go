@@ -63,6 +63,10 @@ func main() {
 			return
 		}
 		defer conn.Close()
+
+		// Parse query parameters
+		queryParams := c.Request.URL.Query()
+
 		for {
 			_, msg, err := conn.ReadMessage()
 			if err != nil {
@@ -78,7 +82,7 @@ func main() {
 				continue
 			}
 
-			thirdparty.HandleWebsocketEvent(conn, event, db)
+			thirdparty.HandleWebsocketEvent(conn, event, db, queryParams)
 		}
 	})
 
