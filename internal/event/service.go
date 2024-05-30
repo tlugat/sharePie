@@ -2,10 +2,8 @@ package event
 
 import (
 	"math/rand"
-	"sharePie-api/internal/category"
 	models2 "sharePie-api/internal/models"
 	"sharePie-api/internal/types"
-	"sharePie-api/internal/user"
 	"sharePie-api/pkg/config/thirdparty/cloudinary"
 	"strings"
 	"time"
@@ -13,15 +11,15 @@ import (
 
 type Service struct {
 	Repository         types.IEventRepository
-	CategoryRepository category.ICategoryRepository
-	UserRepository     user.IUserRepository
+	CategoryRepository types.ICategoryRepository
+	UserRepository     types.IUserRepository
 	ExpenseRepository  types.IExpenseRepository
 }
 
 func NewService(
 	repository types.IEventRepository,
-	categoryRepository category.ICategoryRepository,
-	userRepository user.IUserRepository,
+	categoryRepository types.ICategoryRepository,
+	userRepository types.IUserRepository,
 	expenseRepository types.IExpenseRepository,
 ) types.IEventService {
 	return &Service{

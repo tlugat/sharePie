@@ -2,29 +2,14 @@ package category
 
 import (
 	"sharePie-api/internal/models"
+	"sharePie-api/internal/types"
 )
 
-type CreateCategoryInput struct {
-	Name string `json:"name" binding:"required"`
-}
-
-type UpdateCategoryInput struct {
-	Name string `json:"name"`
-}
-
-type ICategoryService interface {
-	Find() ([]models.Category, error)
-	FindOne(id uint) (models.Category, error)
-	Create(input CreateCategoryInput) (models.Category, error)
-	Update(id uint, input UpdateCategoryInput) (models.Category, error)
-	Delete(id uint) error
-}
-
 type Service struct {
-	Repository ICategoryRepository
+	Repository types.ICategoryRepository
 }
 
-func NewService(repository ICategoryRepository) ICategoryService {
+func NewService(repository types.ICategoryRepository) types.ICategoryService {
 	return &Service{Repository: repository}
 }
 
@@ -36,12 +21,12 @@ func (service *Service) FindOne(id uint) (models.Category, error) {
 	return service.Repository.FindOne(id)
 }
 
-func (service *Service) Create(input CreateCategoryInput) (models.Category, error) {
+func (service *Service) Create(input types.CreateCategoryInput) (models.Category, error) {
 	category := models.Category{Name: input.Name}
 	return service.Repository.Create(category)
 }
 
-func (service *Service) Update(id uint, input UpdateCategoryInput) (models.Category, error) {
+func (service *Service) Update(id uint, input types.UpdateCategoryInput) (models.Category, error) {
 	category, err := service.Repository.FindOne(id)
 
 	if err != nil {

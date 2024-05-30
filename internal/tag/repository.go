@@ -3,21 +3,14 @@ package tag
 import (
 	"gorm.io/gorm"
 	"sharePie-api/internal/models"
+	"sharePie-api/internal/types"
 )
-
-type ITagRepository interface {
-	Find() ([]models.Tag, error)
-	FindOne(id uint) (models.Tag, error)
-	Create(tag models.Tag) (models.Tag, error)
-	Update(tag models.Tag) (models.Tag, error)
-	Delete(id uint) error
-}
 
 type Repository struct {
 	db *gorm.DB
 }
 
-func NewRepository(db *gorm.DB) ITagRepository {
+func NewRepository(db *gorm.DB) types.ITagRepository {
 	return &Repository{db: db}
 }
 

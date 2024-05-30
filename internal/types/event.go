@@ -53,15 +53,8 @@ type JoinEventInput struct {
 	Code string `json:"code" binding:"required"`
 }
 
-type BalanceUser struct {
-	ID        uint   `json:"id"`
-	FirstName string `json:"firstName"`
-	LastName  string `json:"lastName"`
-	Username  string `json:"username"`
-}
-
 type Transaction struct {
-	From   BalanceUser `json:"from"`
-	To     BalanceUser `json:"to"`
+	From   models.User `json:"from"`
+	To     models.User `json:"to"`
 	Amount float64     `json:"amount"`
 }

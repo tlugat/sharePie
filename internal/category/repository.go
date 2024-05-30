@@ -3,21 +3,14 @@ package category
 import (
 	"gorm.io/gorm"
 	"sharePie-api/internal/models"
+	"sharePie-api/internal/types"
 )
-
-type ICategoryRepository interface {
-	Find() ([]models.Category, error)
-	FindOne(id uint) (models.Category, error)
-	Create(category models.Category) (models.Category, error)
-	Update(category models.Category) (models.Category, error)
-	Delete(id uint) error
-}
 
 type Repository struct {
 	db *gorm.DB
 }
 
-func NewRepository(db *gorm.DB) ICategoryRepository {
+func NewRepository(db *gorm.DB) types.ICategoryRepository {
 	return &Repository{db: db}
 }
 
