@@ -3,14 +3,15 @@ package user
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"sharePie-api/internal/types"
 	"strconv"
 )
 
 type Controller struct {
-	userService IUserService
+	userService types.IUserService
 }
 
-func NewController(service IUserService) *Controller {
+func NewController(service types.IUserService) *Controller {
 	return &Controller{userService: service}
 }
 
@@ -65,7 +66,7 @@ func (controller *Controller) FindUser(c *gin.Context) {
 // @Router /users/{id} [put]
 func (controller *Controller) UpdateUser(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	var input UpdateUserInput
+	var input types.UpdateUserInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

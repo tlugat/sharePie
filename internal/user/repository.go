@@ -3,24 +3,14 @@ package user
 import (
 	"gorm.io/gorm"
 	"sharePie-api/internal/models"
+	"sharePie-api/internal/types"
 )
-
-type IUserRepository interface {
-	Find() ([]models.User, error)
-	FindByIds(ids []uint, users *[]models.User) error
-	FindByEventId(eventId uint) ([]models.User, error)
-	FindOneById(id uint) (models.User, error)
-	FindOneByEmail(email string) (models.User, error)
-	Create(user models.User) (models.User, error)
-	Update(user models.User) (models.User, error)
-	Delete(id uint) error
-}
 
 type Repository struct {
 	db *gorm.DB
 }
 
-func NewRepository(db *gorm.DB) IUserRepository {
+func NewRepository(db *gorm.DB) types.IUserRepository {
 	return &Repository{db: db}
 }
 

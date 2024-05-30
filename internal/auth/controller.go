@@ -6,7 +6,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"os"
-	"sharePie-api/internal/user"
+	"sharePie-api/internal/types"
 	"time"
 )
 
@@ -16,10 +16,10 @@ type LoginInput struct {
 }
 
 type Controller struct {
-	userService user.IUserService
+	userService types.IUserService
 }
 
-func NewController(service user.IUserService) *Controller {
+func NewController(service types.IUserService) *Controller {
 	return &Controller{userService: service}
 }
 
@@ -35,7 +35,7 @@ func NewController(service user.IUserService) *Controller {
 // @Failure 500 {object} map[string]interface{} "Returns an error if the user creation fails"
 // @Router /auth/signup [post]
 func (controller *Controller) Signup(c *gin.Context) {
-	var input user.CreateUserInput
+	var input types.CreateUserInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

@@ -3,14 +3,15 @@ package tag
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"sharePie-api/internal/types"
 	"strconv"
 )
 
 type Controller struct {
-	tagService ITagService
+	tagService types.ITagService
 }
 
-func NewController(service ITagService) *Controller {
+func NewController(service types.ITagService) *Controller {
 	return &Controller{tagService: service}
 }
 
@@ -63,7 +64,7 @@ func (controller *Controller) FindTag(c *gin.Context) {
 // @Failure 400 {object} map[string]interface{} "Returns an error if the input is invalid"
 // @Router /tags [post]
 func (controller *Controller) CreateTag(c *gin.Context) {
-	var input CreateTagInput
+	var input types.CreateTagInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -89,7 +90,7 @@ func (controller *Controller) CreateTag(c *gin.Context) {
 // @Router /tags/{id} [put]
 func (controller *Controller) UpdateTag(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	var input UpdateTagInput
+	var input types.UpdateTagInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

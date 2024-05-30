@@ -6,16 +6,14 @@ import (
 	models2 "sharePie-api/internal/models"
 	"sharePie-api/internal/participant"
 	"sharePie-api/internal/payer"
-	"sharePie-api/internal/tag"
 	"sharePie-api/internal/types"
-	"sharePie-api/internal/user"
 	"sharePie-api/pkg/config/thirdparty/cloudinary"
 )
 
 type Service struct {
 	Repository            types.IExpenseRepository
-	TagRepository         tag.ITagRepository
-	UserRepository        user.IUserRepository
+	TagRepository         types.ITagRepository
+	UserRepository        types.IUserRepository
 	ParticipantRepository participant.IParticipantRepository
 	PayerRepository       payer.IPayerRepository
 	EventRepository       types.IEventRepository
@@ -23,8 +21,8 @@ type Service struct {
 
 func NewService(
 	repository types.IExpenseRepository,
-	tagRepository tag.ITagRepository,
-	userRepository user.IUserRepository,
+	tagRepository types.ITagRepository,
+	userRepository types.IUserRepository,
 	participantRepository participant.IParticipantRepository,
 	payerRepository payer.IPayerRepository,
 	eventRepository types.IEventRepository,

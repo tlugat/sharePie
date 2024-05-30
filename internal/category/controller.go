@@ -3,14 +3,15 @@ package category
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"sharePie-api/internal/types"
 	"strconv"
 )
 
 type Controller struct {
-	categoryService ICategoryService
+	categoryService types.ICategoryService
 }
 
-func NewController(service ICategoryService) *Controller {
+func NewController(service types.ICategoryService) *Controller {
 	return &Controller{categoryService: service}
 }
 
@@ -63,7 +64,7 @@ func (controller *Controller) FindCategory(c *gin.Context) {
 // @Failure 400 {object} map[string]interface{} "Returns an error if the input is invalid"
 // @Router /categories [post]
 func (controller *Controller) CreateCategory(c *gin.Context) {
-	var input CreateCategoryInput
+	var input types.CreateCategoryInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -89,7 +90,7 @@ func (controller *Controller) CreateCategory(c *gin.Context) {
 // @Router /categories/{id} [put]
 func (controller *Controller) UpdateCategory(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	var input UpdateCategoryInput
+	var input types.UpdateCategoryInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

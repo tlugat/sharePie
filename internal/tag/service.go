@@ -2,29 +2,14 @@ package tag
 
 import (
 	"sharePie-api/internal/models"
+	"sharePie-api/internal/types"
 )
 
-type CreateTagInput struct {
-	Name string `json:"name" binding:"required"`
-}
-
-type UpdateTagInput struct {
-	Name string `json:"title"`
-}
-
-type ITagService interface {
-	Find() ([]models.Tag, error)
-	FindOne(id uint) (models.Tag, error)
-	Create(input CreateTagInput) (models.Tag, error)
-	Update(id uint, input UpdateTagInput) (models.Tag, error)
-	Delete(id uint) error
-}
-
 type Service struct {
-	Repository ITagRepository
+	Repository types.ITagRepository
 }
 
-func NewService(repository ITagRepository) ITagService {
+func NewService(repository types.ITagRepository) types.ITagService {
 	return &Service{Repository: repository}
 }
 
@@ -36,12 +21,12 @@ func (service *Service) FindOne(id uint) (models.Tag, error) {
 	return service.Repository.FindOne(id)
 }
 
-func (service *Service) Create(input CreateTagInput) (models.Tag, error) {
+func (service *Service) Create(input types.CreateTagInput) (models.Tag, error) {
 	tag := models.Tag{Name: input.Name}
 	return service.Repository.Create(tag)
 }
 
-func (service *Service) Update(id uint, input UpdateTagInput) (models.Tag, error) {
+func (service *Service) Update(id uint, input types.UpdateTagInput) (models.Tag, error) {
 	tag, err := service.Repository.FindOne(id)
 
 	if err != nil {
