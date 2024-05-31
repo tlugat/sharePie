@@ -72,7 +72,7 @@ func EventHandler(db *gorm.DB, route *gin.RouterGroup) {
 	route.GET("/events", middleware.IsAuthenticated(db), eventController.FindEvents)
 	route.POST("/events", middleware.IsAuthenticated(db), eventController.CreateEvent)
 	route.GET("/events/:id", middleware.IsAuthenticated(db), eventController.FindEvent)
-	route.PATCH("/events/:id", middleware.IsAuthenticated(db), eventController.UpdateEvent)
+	route.PATCH("/events/:id", middleware.IsAuthenticated(db), middleware.IsEventActive(db), eventController.UpdateEvent)
 	route.PATCH("/events/:id/state", middleware.IsAuthenticated(db), eventController.UpdateEventState)
 	route.DELETE("/events/:id", middleware.IsAuthenticated(db), eventController.DeleteEvent)
 	route.GET("/events/:id/balances", middleware.IsAuthenticated(db), eventController.GetEventBalances)
@@ -80,7 +80,7 @@ func EventHandler(db *gorm.DB, route *gin.RouterGroup) {
 	route.GET("/events/:id/transactions", middleware.IsAuthenticated(db), eventController.GetEventTransactions)
 	route.POST("/events/:id/transactions", middleware.IsAuthenticated(db), eventController.CreateEventTransactions)
 	route.GET("/events/:id/users", middleware.IsAuthenticated(db), eventController.GetEventUsers)
-	route.POST("/events/join", middleware.IsAuthenticated(db), eventController.JoinEvent)
+	route.POST("/events/join", middleware.IsAuthenticated(db), middleware.IsEventActive(db), eventController.JoinEvent)
 }
 
 func ExpenseHandler(db *gorm.DB, route *gin.RouterGroup) {

@@ -17,7 +17,6 @@ import (
 	"sharePie-api/pkg/config/env"
 	"sharePie-api/pkg/config/thirdparty/cloudinary"
 	websocket2 "sharePie-api/pkg/config/thirdparty/websocket"
-	"strconv"
 	"syscall"
 	"time"
 )
@@ -52,14 +51,8 @@ func main() {
 	hub := websocket2.NewHub(db)
 	go hub.Run()
 
-	api.GET("/ws/event/:eventId", middleware.IsAuthenticated(db), func(c *gin.Context) {
-		room := c.Param("eventId")
-		if _, err := strconv.ParseUint(room, 10, 32); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid eventId"})
-			return
-		}
-
-		websocket2.ServeWs(hub, room, c)
+	api.GET("/ws/events/:eventId", middleware.IsAuthenticated(db), middleware.IsEventActive(db), func(c *gin.Context) {
+		websocket2.ServeWs(hub, c)
 	})
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
