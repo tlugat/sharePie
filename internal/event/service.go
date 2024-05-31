@@ -59,6 +59,7 @@ func (service *Service) Create(input types.CreateEventInput, user models2.User) 
 		AuthorID:    user.ID,
 		Code:        generateInvitationCode(6),
 		Users:       []models2.User{user},
+		State:       models2.EventStateActive,
 	}
 	if input.Image != "" {
 		image, err := cloudinary.UploadImage(input.Image, "Events")
@@ -97,6 +98,21 @@ func (service *Service) Update(id uint, input types.UpdateEventInput) (models2.E
 	if input.Goal != 0 {
 		event.Goal = input.Goal
 	}
+
+	return service.Repository.Update(event)
+}
+
+func (service *Service) UpdateState(id uint, input types.UpdateEventStateInput) (models2.Event, error) {
+	event, err := service.Repository.FindOne(id)
+	if err != nil {
+		return models2.Event{}, err
+	}
+
+	if err := input.State.IsValid(); err != nil {
+		return models2.Event{}, err
+	}
+
+	event.State = input.State
 
 	return service.Repository.Update(event)
 }

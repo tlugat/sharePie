@@ -73,6 +73,7 @@ func EventHandler(db *gorm.DB, route *gin.RouterGroup) {
 	route.POST("/events", middleware.IsAuthenticated(db), eventController.CreateEvent)
 	route.GET("/events/:id", middleware.IsAuthenticated(db), eventController.FindEvent)
 	route.PATCH("/events/:id", middleware.IsAuthenticated(db), eventController.UpdateEvent)
+	route.PATCH("/events/:id/state", middleware.IsAuthenticated(db), eventController.UpdateEventState)
 	route.DELETE("/events/:id", middleware.IsAuthenticated(db), eventController.DeleteEvent)
 	route.GET("/events/:id/balances", middleware.IsAuthenticated(db), eventController.GetEventBalances)
 	route.POST("/events/:id/balances", middleware.IsAuthenticated(db), eventController.CreateEventBalances)

@@ -3,21 +3,14 @@ package achievement
 import (
 	"gorm.io/gorm"
 	"sharePie-api/internal/models"
+	"sharePie-api/internal/types"
 )
-
-type IAchievementRepository interface {
-	Find() ([]models.Achievement, error)
-	FindOne(id uint) (models.Achievement, error)
-	Create(achievement models.Achievement) (models.Achievement, error)
-	Update(achievement models.Achievement) (models.Achievement, error)
-	Delete(id uint) error
-}
 
 type Repository struct {
 	db *gorm.DB
 }
 
-func NewRepository(db *gorm.DB) IAchievementRepository {
+func NewRepository(db *gorm.DB) types.IAchievementRepository {
 	return &Repository{db: db}
 }
 

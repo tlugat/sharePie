@@ -111,6 +111,32 @@ func (controller *Controller) UpdateEvent(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": event})
 }
 
+// UpdateEventState updates an existing event.
+// @Summary Update an event
+// @Description Updates an existing event with new data
+// @Tags Events
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Event ID"
+// @Param input body services.UpdateEventStateInput true "Event update data"
+// @Success 200 {object} map[string]interface{} "Returns the updated event"
+// @Failure 400 {object} map[string]interface{} "Returns an error if the input is invalid or the event does not exist"
+// @Router /events/{id} [put]
+func (controller *Controller) UpdateEventState(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	var input types.UpdateEventStateInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	event, err := controller.eventService.UpdateState(uint(id), input)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": event})
+}
+
 // DeleteEvent removes an event.
 // @Summary Delete an event
 // @Description Deletes an event from the database
