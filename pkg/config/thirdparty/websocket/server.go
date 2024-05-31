@@ -15,7 +15,8 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-func ServeWs(hub *Hub, room string, c *gin.Context) {
+func ServeWs(hub *Hub, c *gin.Context) {
+	room := c.Param("eventId")
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		return
