@@ -3,14 +3,15 @@ package achievement
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"sharePie-api/internal/types"
 	"strconv"
 )
 
 type Controller struct {
-	achievementService IAchievementService
+	achievementService types.IAchievementService
 }
 
-func NewController(service IAchievementService) *Controller {
+func NewController(service types.IAchievementService) *Controller {
 	return &Controller{achievementService: service}
 }
 
@@ -63,7 +64,7 @@ func (controller *Controller) FindAchievement(c *gin.Context) {
 // @Failure 400 {object} map[string]interface{} "Returns an error if the input is invalid or user authentication fails"
 // @Router /achievements [post]
 func (controller *Controller) CreateAchievement(c *gin.Context) {
-	var input CreateAchievementInput
+	var input types.CreateAchievementInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -90,7 +91,7 @@ func (controller *Controller) CreateAchievement(c *gin.Context) {
 // @Router /achievements/{id} [put]
 func (controller *Controller) UpdateAchievement(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	var input UpdateAchievementInput
+	var input types.UpdateAchievementInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

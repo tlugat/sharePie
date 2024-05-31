@@ -23,6 +23,7 @@ type IEventService interface {
 	FindOne(id uint) (models.Event, error)
 	Create(input CreateEventInput, user models.User) (models.Event, error)
 	Update(id uint, input UpdateEventInput) (models.Event, error)
+	UpdateState(id uint, input UpdateEventStateInput) (models.Event, error)
 	Delete(id uint) error
 	GetUsers(id uint) ([]models.User, error)
 	AddUser(code string, user models.User) error
@@ -51,6 +52,10 @@ type UpdateEventInput struct {
 
 type JoinEventInput struct {
 	Code string `json:"code" binding:"required"`
+}
+
+type UpdateEventStateInput struct {
+	State models.EventState `json:"state" binding:"required"`
 }
 
 type Transaction struct {
