@@ -16,6 +16,7 @@ type IEventRepository interface {
 	FindTransactions(event models.Event) ([]models.Transaction, error)
 	DeleteBalances(event models.Event) error
 	DeleteTransactions(event models.Event) error
+	RemoveUsers(event models.Event) error
 }
 
 type IEventService interface {

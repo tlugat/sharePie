@@ -99,6 +99,19 @@ func (service *Service) Update(id uint, input types.UpdateEventInput) (models2.E
 		event.Goal = input.Goal
 	}
 
+	if input.Users != nil {
+		users, err := service.UserRepository.FindByIds(input.Users)
+		if err != nil {
+			return models2.Event{}, err
+		}
+		err = service.Repository.RemoveUsers(event)
+		if err != nil {
+			return models2.Event{}, err
+		}
+		event.Users = users
+
+	}
+
 	return service.Repository.Update(event)
 }
 

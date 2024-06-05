@@ -20,8 +20,10 @@ func (r *Repository) Find() ([]models.User, error) {
 	return users, result.Error
 }
 
-func (r *Repository) FindByIds(ids []uint, users *[]models.User) error {
-	return r.db.Where("id IN ?", ids).Find(users).Error
+func (r *Repository) FindByIds(ids []uint) ([]models.User, error) {
+	var users []models.User
+	result := r.db.Where("id IN ?", ids).Find(&users)
+	return users, result.Error
 }
 
 func (r *Repository) FindByEventId(eventId uint) ([]models.User, error) {
