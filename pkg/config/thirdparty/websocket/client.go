@@ -99,7 +99,7 @@ func (c *Client) handleUpdateEvent(payload json.RawMessage) {
 	}
 
 	message, err := json.Marshal(Message{
-		Type:    "updateEvent",
+		Type:    "event",
 		Payload: updatedEventJSON,
 	})
 	if err != nil {
@@ -108,6 +108,29 @@ func (c *Client) handleUpdateEvent(payload json.RawMessage) {
 	}
 
 	c.hub.rooms[c.room].broadcast <- message
+
+	users, err := c.hub.eventService.GetUsers(uint(eventId))
+	if err != nil {
+		fmt.Println("Failed to get event users:", err)
+		return
+	}
+
+	usersJSON, err := json.Marshal(users)
+	if err != nil {
+		fmt.Println("Failed to marshal users:", err)
+		return
+	}
+
+	usersMessage, err := json.Marshal(Message{
+		Type:    "users",
+		Payload: usersJSON,
+	})
+	if err != nil {
+		fmt.Println("Failed to marshal updated event:", err)
+		return
+	}
+
+	c.hub.rooms[c.room].broadcast <- usersMessage
 }
 
 func (c *Client) handleCreateExpense(payload json.RawMessage) {

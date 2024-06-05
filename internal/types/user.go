@@ -13,7 +13,7 @@ type IUserService interface {
 
 type IUserRepository interface {
 	Find() ([]models.User, error)
-	FindByIds(ids []uint, users *[]models.User) error
+	FindByIds(ids []uint) ([]models.User, error)
 	FindByEventId(eventId uint) ([]models.User, error)
 	FindOneById(id uint) (models.User, error)
 	FindOneByEmail(email string) (models.User, error)

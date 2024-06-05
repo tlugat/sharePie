@@ -92,3 +92,8 @@ func (r *Repository) DeleteTransactions(event models.Event) error {
 	result := r.db.Where("event_id = ?", event.ID).Delete(&models.Transaction{})
 	return result.Error
 }
+
+func (r *Repository) RemoveUsers(event models.Event) error {
+	err := r.db.Model(&event).Association("Users").Clear()
+	return err
+}
