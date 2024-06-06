@@ -6,6 +6,7 @@ import (
 	"sharePie-api/internal/achievement"
 	"sharePie-api/internal/auth"
 	"sharePie-api/internal/auth/middleware"
+	"sharePie-api/internal/avatar"
 	"sharePie-api/internal/category"
 	"sharePie-api/internal/event"
 	"sharePie-api/internal/expense"
@@ -116,4 +117,16 @@ func AchievementHandler(db *gorm.DB, route *gin.RouterGroup) {
 	route.GET("/achievements/:id", middleware.IsAuthenticated(db), achievementController.FindAchievement)
 	route.PATCH("/achievements/:id", middleware.IsAuthenticated(db), achievementController.UpdateAchievement)
 	route.DELETE("/achievements/:id", middleware.IsAuthenticated(db), achievementController.DeleteAchievement)
+}
+
+func AvatarHandler(db *gorm.DB, route *gin.RouterGroup) {
+	avatarRepository := avatar.NewRepository(db)
+	avatarService := avatar.NewService(avatarRepository)
+	avatarController := avatar.NewController(avatarService)
+
+	route.GET("/avatars", middleware.IsAuthenticated(db), avatarController.FindAvatars)
+	route.POST("/avatars", middleware.IsAuthenticated(db), middleware.IsGranted(constants.AdminRole), avatarController.CreateAvatar)
+	route.GET("/avatars/:id", middleware.IsAuthenticated(db), avatarController.FindAvatar)
+	route.PATCH("/avatars/:id", middleware.IsAuthenticated(db), middleware.IsGranted(constants.AdminRole), avatarController.UpdateAvatar)
+	route.DELETE("/avatars/:id", middleware.IsAuthenticated(db), middleware.IsGranted(constants.AdminRole), avatarController.DeleteAvatar)
 }
