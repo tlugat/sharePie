@@ -32,6 +32,7 @@ type IEventService interface {
 	CreateTransactions(event models.Event) ([]models.Transaction, error)
 	GetBalances(event models.Event) ([]models.Balance, error)
 	GetTransactions(event models.Event) ([]models.Transaction, error)
+	FindExpenses(event models.Event) ([]models.Expense, error)
 }
 
 type CreateEventInput struct {

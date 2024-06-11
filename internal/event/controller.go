@@ -317,3 +317,23 @@ func (controller *Controller) JoinEvent(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"data": true})
 }
+
+func (controller *Controller) GetExpenses(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+
+	event, err := controller.eventService.FindOne(uint(id))
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Event not found!"})
+		return
+	}
+
+	expense, err := controller.eventService.FindExpenses(event)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": expense})
+}

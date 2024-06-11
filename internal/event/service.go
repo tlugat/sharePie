@@ -321,3 +321,11 @@ func generateInvitationCode(length int) string {
 
 	return result.String()
 }
+
+func (service *Service) FindExpenses(event models2.Event) ([]models2.Expense, error) {
+	expenses, err := service.ExpenseRepository.FindByEventId(event.ID)
+	if err != nil {
+		return nil, err
+	}
+	return expenses, nil
+}

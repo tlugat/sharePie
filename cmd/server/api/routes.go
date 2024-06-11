@@ -82,6 +82,7 @@ func EventHandler(db *gorm.DB, route *gin.RouterGroup) {
 	route.POST("/events/:id/transactions", middleware.IsAuthenticated(db), eventController.CreateEventTransactions)
 	route.GET("/events/:id/users", middleware.IsAuthenticated(db), eventController.GetEventUsers)
 	route.POST("/events/join", middleware.IsAuthenticated(db), middleware.IsEventActive(db), eventController.JoinEvent)
+	route.GET("/event/expenses", middleware.IsAuthenticated(db), eventController.GetExpenses)
 }
 
 func ExpenseHandler(db *gorm.DB, route *gin.RouterGroup) {
