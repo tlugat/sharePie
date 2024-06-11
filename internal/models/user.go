@@ -13,6 +13,6 @@ type User struct {
 	Role         constants.Role `json:"role"`
 	Events       []Event        `json:"-" gorm:"foreignKey:AuthorID"`
 	Achievements []Achievement  `json:"-" gorm:"many2many:user_achievements;"`
-	AvatarID     uint           `json:"-" gorm:"foreignKey:AvatarID"`
-	Avatar       Avatar         `json:"avatar"`
+	AvatarID     *uint          `json:"-"`
+	Avatar       *Avatar        `json:"avatar" gorm:"foreignKey:AvatarID"`
 }
