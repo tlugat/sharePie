@@ -17,7 +17,7 @@ type IEventRepository interface {
 	DeleteBalances(event models.Event) error
 	DeleteTransactions(event models.Event) error
 	RemoveUsers(event models.Event) error
-	FindUserEvents(id uint) ([]models.Event, error)
+	FindByUser(id uint) ([]models.Event, error)
 }
 
 type IEventService interface {
@@ -34,7 +34,7 @@ type IEventService interface {
 	GetBalances(event models.Event) ([]models.Balance, error)
 	GetTransactions(event models.Event) ([]models.Transaction, error)
 	FindExpenses(id uint) ([]models.Expense, error)
-	FindUserEvents(id uint) ([]models.Event, error)
+	FindByUser(id uint) ([]models.Event, error)
 }
 
 type CreateEventInput struct {

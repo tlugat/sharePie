@@ -29,6 +29,7 @@ func NewController(service types.IEventService) *Controller {
 func (controller *Controller) FindEvents(c *gin.Context) {
 	user, ok := auth.GetUserFromContext(c)
 	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "user not found"})
 		return
 	}
 
@@ -39,16 +40,16 @@ func (controller *Controller) FindEvents(c *gin.Context) {
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{"data": events})
-	} else if constants.UserRole == user.Role {
-		events, err := controller.eventService.FindUserEvents(user.ID)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		c.JSON(http.StatusOK, gin.H{"data": events})
-	} else {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "user not found"})
+		return
 	}
+
+	events, err := controller.eventService.FindByUser(user.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": events})
+
 }
 
 // FindEvent retrieves an event by ID.
