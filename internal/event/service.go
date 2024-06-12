@@ -330,8 +330,8 @@ func (service *Service) FindExpenses(id uint) ([]models2.Expense, error) {
 	return expenses, nil
 }
 
-func (service *Service) FindUserEvents(id uint) ([]models2.Event, error) {
-	events, err := service.FindUserEvents(id)
+func (service *Service) FindByUser(id uint) ([]models2.Event, error) {
+	events, err := service.Repository.FindByUser(id)
 	if err != nil {
 		return nil, err
 	}

@@ -98,7 +98,7 @@ func (r *Repository) RemoveUsers(event models.Event) error {
 	return err
 }
 
-func (r *Repository) FindUserEvents(userID uint) ([]models.Event, error) {
+func (r *Repository) FindByUser(userID uint) ([]models.Event, error) {
 	var events []models.Event
 	result := r.db.Joins("JOIN event_users ON event_users.event_id = events.id").
 		Where("event_users.user_id = ?", userID).Find(&events)
