@@ -3,6 +3,7 @@ package user
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"sharePie-api/internal/auth"
 	"sharePie-api/internal/types"
 	"strconv"
 )
@@ -96,4 +97,12 @@ func (controller *Controller) DeleteUser(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": true})
+}
+
+func (controller *Controller) GetUserFromToken(c *gin.Context) {
+	user, ok := auth.GetUserFromContext(c)
+	if !ok {
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": user})
 }
