@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"sharePie-api/internal/auth"
 	"sharePie-api/internal/types"
+	"sharePie-api/pkg/constants"
 	"strconv"
 )
 
@@ -26,12 +27,28 @@ func NewController(service types.IEventService) *Controller {
 // @Failure 500 {object} map[string]interface{} "Returns an error if the request fails"
 // @Router /events [get]
 func (controller *Controller) FindEvents(c *gin.Context) {
-	events, err := controller.eventService.Find()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	user, ok := auth.GetUserFromContext(c)
+	if !ok {
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"data": events})
+
+	if user.Role == constants.AdminRole {
+		events, err := controller.eventService.Find()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"data": events})
+	} else if constants.UserRole == user.Role {
+		events, err := controller.eventService.FindUserEvents(user.ID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"data": events})
+	} else {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "user not found"})
+	}
 }
 
 // FindEvent retrieves an event by ID.
