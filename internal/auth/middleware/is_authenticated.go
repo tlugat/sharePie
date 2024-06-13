@@ -39,6 +39,11 @@ func IsAuthenticated(db *gorm.DB) gin.HandlerFunc {
 			return []byte(os.Getenv("JWT_SECRET")), nil
 		})
 
+		if token == nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+			return
+		}
+
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 			// Check the expiry date
 			if float64(time.Now().Unix()) > claims["exp"].(float64) {
