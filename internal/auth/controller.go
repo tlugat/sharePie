@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"sharePie-api/internal/types"
+	"strings"
 	"time"
 )
 
@@ -71,6 +72,9 @@ func (controller *Controller) Login(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	input.Email = strings.ToLower(input.Email)
+
 	user, err := controller.userService.FindOneByEmail(input.Email)
 
 	if err != nil {

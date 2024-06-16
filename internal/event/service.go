@@ -1,6 +1,7 @@
 package event
 
 import (
+	"errors"
 	"math/rand"
 	models2 "sharePie-api/internal/models"
 	"sharePie-api/internal/types"
@@ -147,6 +148,10 @@ func (service *Service) AddUser(code string, user models2.User) error {
 	event, err := service.Repository.FindOneByCode(code)
 	if err != nil {
 		return err
+	}
+
+	if event.State != models2.EventStateActive {
+		return errors.New("Event is not active")
 	}
 
 	users, err := service.UserRepository.FindByEventId(event.ID)
