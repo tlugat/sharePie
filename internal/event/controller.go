@@ -333,7 +333,7 @@ func (controller *Controller) JoinEvent(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"eventId": event.ID})
+	c.JSON(http.StatusOK, gin.H{"data": event})
 }
 
 func (controller *Controller) GetExpenses(c *gin.Context) {
