@@ -326,14 +326,14 @@ func (controller *Controller) JoinEvent(c *gin.Context) {
 		return
 	}
 
-	err := controller.eventService.AddUser(input.Code, user)
+	event, err := controller.eventService.AddUser(input.Code, user)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": true})
+	c.JSON(http.StatusOK, gin.H{"eventId": event.ID})
 }
 
 func (controller *Controller) GetExpenses(c *gin.Context) {
