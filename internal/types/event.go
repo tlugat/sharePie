@@ -28,7 +28,7 @@ type IEventService interface {
 	UpdateState(id uint, input UpdateEventStateInput) (models.Event, error)
 	Delete(id uint) error
 	GetUsers(id uint) ([]models.User, error)
-	AddUser(code string, user models.User) error
+	AddUser(code string, user models.User) (models.Event, error)
 	CreateBalances(event models.Event) ([]models.Balance, error)
 	CreateTransactions(event models.Event) ([]models.Transaction, error)
 	GetBalances(event models.Event) ([]models.Balance, error)

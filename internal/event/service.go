@@ -144,19 +144,19 @@ func (service *Service) GetUsers(id uint) ([]models2.User, error) {
 	return users, nil
 }
 
-func (service *Service) AddUser(code string, user models2.User) error {
+func (service *Service) AddUser(code string, user models2.User) (models2.Event, error) {
 	event, err := service.Repository.FindOneByCode(code)
 	if err != nil {
-		return err
+		return models2.Event{}, err
 	}
 
 	if event.State != models2.EventStateActive {
-		return errors.New("Event is not active")
+		return models2.Event{}, errors.New("Event is not active")
 	}
 
 	users, err := service.UserRepository.FindByEventId(event.ID)
 	if err != nil {
-		return err
+		return models2.Event{}, err
 	}
 	isUserAlreadyInEvent := false
 
@@ -168,14 +168,18 @@ func (service *Service) AddUser(code string, user models2.User) error {
 	}
 
 	if isUserAlreadyInEvent {
-		return nil
+		return models2.Event{}, errors.New("User is already in the event")
 	}
 
 	event.Users = append(users, user)
 
 	_, err = service.Repository.Update(event)
 
-	return err
+	if err != nil {
+		return models2.Event{}, err
+	}
+
+	return event, nil
 }
 
 func (service *Service) CreateBalances(event models2.Event) ([]models2.Balance, error) {
