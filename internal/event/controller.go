@@ -1,12 +1,14 @@
 package event
 
 import (
-	"github.com/gin-gonic/gin"
+	"errors"
 	"net/http"
 	"sharePie-api/internal/auth"
 	"sharePie-api/internal/types"
 	"sharePie-api/pkg/constants"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
 type Controller struct {
@@ -313,7 +315,6 @@ func (controller *Controller) GetEventTransactions(c *gin.Context) {
 }
 
 func (controller *Controller) JoinEvent(c *gin.Context) {
-
 	var input types.JoinEventInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -321,15 +322,19 @@ func (controller *Controller) JoinEvent(c *gin.Context) {
 	}
 
 	user, ok := auth.GetUserFromContext(c)
-
 	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
 
 	event, err := controller.eventService.AddUser(input.Code, user)
-
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		var conflictErr *types.ConflictError
+		if errors.As(err, &conflictErr) {
+			c.JSON(http.StatusConflict, gin.H{"error": conflictErr.Error()})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
 		return
 	}
 
