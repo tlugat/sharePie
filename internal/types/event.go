@@ -1,6 +1,9 @@
 package types
 
-import "sharePie-api/internal/models"
+import (
+	"errors"
+	"sharePie-api/internal/models"
+)
 
 type IEventRepository interface {
 	Find() ([]models.Event, error)
@@ -66,4 +69,18 @@ type Transaction struct {
 	From   models.User `json:"from"`
 	To     models.User `json:"to"`
 	Amount float64     `json:"amount"`
+}
+
+var ErrConflict = errors.New("conflict")
+
+type ConflictError struct {
+	Message string
+}
+
+func (e *ConflictError) Error() string {
+	return e.Message
+}
+
+func NewConflictError(message string) error {
+	return &ConflictError{Message: message}
 }

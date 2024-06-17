@@ -168,13 +168,12 @@ func (service *Service) AddUser(code string, user models2.User) (models2.Event, 
 	}
 
 	if isUserAlreadyInEvent {
-		return models2.Event{}, errors.New("User is already in the event")
+		return models2.Event{}, types.NewConflictError("User is already in the event")
 	}
 
 	event.Users = append(users, user)
 
 	_, err = service.Repository.Update(event)
-
 	if err != nil {
 		return models2.Event{}, err
 	}
