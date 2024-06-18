@@ -43,19 +43,22 @@ func TagHandler(db *gorm.DB, route *gin.RouterGroup) {
 
 func UserHandler(db *gorm.DB, route *gin.RouterGroup) {
 	userRepository := user.NewRepository(db)
-	userService := user.NewService(userRepository)
+	avatarRepository := avatar.NewRepository(db)
+	userService := user.NewService(userRepository, avatarRepository)
 	userController := user.NewController(userService)
 
 	route.GET("/users", middleware.IsAuthenticated(db), middleware.IsGranted(constants.AdminRole), userController.FindUsers)
 	route.GET("/users/:id", middleware.IsAuthenticated(db), userController.FindUser)
-	route.PATCH("/users/:id", middleware.IsAuthenticated(db), userController.UpdateUser)
+	route.PATCH("/users/me", middleware.IsAuthenticated(db), userController.UpdateCurrentUser)
+	route.PATCH("/users/:id", middleware.IsAuthenticated(db), middleware.IsGranted(constants.AdminRole), userController.UpdateUser)
 	route.DELETE("/users/:id", middleware.IsAuthenticated(db), middleware.IsGranted(constants.AdminRole), userController.DeleteUser)
 	route.GET("/users/me", middleware.IsAuthenticated(db), userController.GetUserFromToken)
 }
 
 func AuthHandler(db *gorm.DB, route *gin.RouterGroup) {
 	userRepository := user.NewRepository(db)
-	userService := user.NewService(userRepository)
+	avatarRepository := avatar.NewRepository(db)
+	userService := user.NewService(userRepository, avatarRepository)
 	authController := auth.NewController(userService)
 
 	route.POST("/signup", authController.Signup)

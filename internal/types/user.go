@@ -29,5 +29,7 @@ type CreateUserInput struct {
 }
 
 type UpdateUserInput struct {
-	Username string `json:"username" binding:"required"`
+	Username string `json:"username"`
+	Avatar   uint   `json:"avatar"`
+	Email    string `json:"email"`
 }
