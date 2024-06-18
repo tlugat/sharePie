@@ -52,12 +52,19 @@ func (service *Service) FindOne(id uint) (models2.Event, error) {
 }
 
 func (service *Service) Create(input types.CreateEventInput, user models2.User) (models2.Event, error) {
+	category, err := service.CategoryRepository.FindOne(input.Category)
+	if err != nil {
+		return models2.Event{}, err
+	}
+
 	event := models2.Event{
 		Name:        input.Name,
 		Description: input.Description,
 		CategoryID:  input.Category,
+		Category:    category,
 		Goal:        input.Goal,
 		AuthorID:    user.ID,
+		Author:      user,
 		Code:        generateInvitationCode(6),
 		Users:       []models2.User{user},
 		State:       models2.EventStateActive,

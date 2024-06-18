@@ -16,7 +16,14 @@ func NewRepository(db *gorm.DB) types.IEventRepository {
 
 func (r *Repository) Find() ([]models.Event, error) {
 	var events []models.Event
-	result := r.db.Preload("Category").Preload("Author").Find(&events)
+	result := r.db.Preload("Category").Preload("Author.Avatar").Find(&events)
+	return events, result.Error
+}
+
+func (r *Repository) FindByUser(userID uint) ([]models.Event, error) {
+	var events []models.Event
+	result := r.db.Preload("Category").Preload("Author.Avatar").Joins("JOIN event_users ON event_users.event_id = events.id").
+		Where("event_users.user_id = ?", userID).Find(&events)
 	return events, result.Error
 }
 
@@ -96,11 +103,4 @@ func (r *Repository) DeleteTransactions(event models.Event) error {
 func (r *Repository) RemoveUsers(event models.Event) error {
 	err := r.db.Model(&event).Association("Users").Clear()
 	return err
-}
-
-func (r *Repository) FindByUser(userID uint) ([]models.Event, error) {
-	var events []models.Event
-	result := r.db.Joins("JOIN event_users ON event_users.event_id = events.id").
-		Where("event_users.user_id = ?", userID).Find(&events)
-	return events, result.Error
 }

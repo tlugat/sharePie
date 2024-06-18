@@ -1,17 +1,19 @@
 package user
 
 import (
+	"fmt"
 	"sharePie-api/internal/models"
 	"sharePie-api/internal/types"
 	"sharePie-api/pkg/constants"
 )
 
 type Service struct {
-	Repository types.IUserRepository
+	Repository       types.IUserRepository
+	AvatarRepository types.IAvatarRepository
 }
 
-func NewService(repository types.IUserRepository) types.IUserService {
-	return &Service{Repository: repository}
+func NewService(repository types.IUserRepository, avatarRepository types.IAvatarRepository) types.IUserService {
+	return &Service{Repository: repository, AvatarRepository: avatarRepository}
 }
 
 func (service *Service) Find() ([]models.User, error) {
@@ -41,6 +43,21 @@ func (service *Service) Update(id uint, input types.UpdateUserInput) (models.Use
 	if input.Username != "" {
 		user.Username = input.Username
 	}
+
+	if input.Email != "" {
+		user.Email = input.Email
+	}
+
+	if input.Avatar != 0 {
+		avatar, err := service.AvatarRepository.FindOne(input.Avatar)
+		if err != nil {
+			return models.User{}, err
+		}
+		user.AvatarID = input.Avatar
+		user.Avatar = avatar
+	}
+
+	fmt.Println("user", user)
 
 	return service.Repository.Update(user)
 }
