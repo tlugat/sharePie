@@ -29,7 +29,19 @@ func (service *Service) FindOneByEmail(email string) (models.User, error) {
 }
 
 func (service *Service) Create(input types.CreateUserInput) (models.User, error) {
-	user := models.User{Username: input.Username, Email: input.Email, Password: input.Password, Role: constants.UserRole}
+	defaultAvatar, err := service.AvatarRepository.FindOne(25)
+	if err != nil {
+		return models.User{}, err
+	}
+
+	user := models.User{
+		Username: input.Username,
+		Email:    input.Email,
+		Password: input.Password,
+		Role:     constants.UserRole,
+		AvatarID: defaultAvatar.ID,
+		Avatar:   defaultAvatar,
+	}
 	return service.Repository.Create(user)
 }
 
