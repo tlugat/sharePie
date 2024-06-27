@@ -218,6 +218,7 @@ func (c *Client) refreshExpenses() {
 	c.hub.rooms[c.room].broadcast <- message
 	c.refreshBalances(event)
 	c.refreshTransactions(event)
+	c.refreshUsers(event)
 }
 
 func (c *Client) refreshBalances(event models.Event) {
@@ -264,6 +265,31 @@ func (c *Client) refreshTransactions(event models.Event) {
 	})
 	if err != nil {
 		fmt.Println("Failed to marshal transactions message:", err)
+		return
+	}
+
+	c.hub.rooms[c.room].broadcast <- message
+}
+
+func (c *Client) refreshUsers(event models.Event) {
+	users, err := c.hub.eventService.GetUsers(event.ID)
+	if err != nil {
+		fmt.Println("Failed to get users:", err)
+		return
+	}
+
+	usersJSON, err := json.Marshal(users)
+	if err != nil {
+		fmt.Println("Failed to marshal users:", err)
+		return
+	}
+
+	message, err := json.Marshal(Message{
+		Type:    "users",
+		Payload: usersJSON,
+	})
+	if err != nil {
+		fmt.Println("Failed to marshal users message:", err)
 		return
 	}
 

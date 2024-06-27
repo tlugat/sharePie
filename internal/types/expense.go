@@ -5,6 +5,7 @@ import "sharePie-api/internal/models"
 type IExpenseRepository interface {
 	Find() ([]models.Expense, error)
 	FindByEventId(id uint) ([]models.Expense, error)
+	FindByUserIdAndEventId(userID uint, eventID uint) ([]models.Expense, error)
 	FindOne(id uint) (models.Expense, error)
 	Create(expense models.Expense) (models.Expense, error)
 	Update(expense models.Expense) (models.Expense, error)
