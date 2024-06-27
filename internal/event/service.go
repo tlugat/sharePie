@@ -142,13 +142,34 @@ func (service *Service) Delete(id uint) error {
 	return service.Repository.Delete(id)
 }
 
-func (service *Service) GetUsers(id uint) ([]models2.User, error) {
+func (service *Service) GetUsers(id uint) ([]types.UserWithExpenses, error) {
 	users, err := service.UserRepository.FindByEventId(id)
 	if err != nil {
 		return nil, err
 	}
 
-	return users, nil
+	var usersWithExpenses []types.UserWithExpenses
+
+	for _, user := range users {
+		expenses, err := service.ExpenseRepository.FindByUserIdAndEventId(user.ID, id)
+		if err != nil {
+			return nil, err
+		}
+
+		totalExpenses := 0.0
+		for _, expense := range expenses {
+			totalExpenses += expense.Amount
+		}
+
+		userWithExpenses := types.UserWithExpenses{
+			User:          user,
+			ExpenseCount:  len(expenses),
+			TotalExpenses: totalExpenses,
+		}
+		usersWithExpenses = append(usersWithExpenses, userWithExpenses)
+	}
+
+	return usersWithExpenses, nil
 }
 
 func (service *Service) AddUser(code string, user models2.User) (models2.Event, error) {

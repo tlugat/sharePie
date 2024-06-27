@@ -30,7 +30,7 @@ type IEventService interface {
 	Update(id uint, input UpdateEventInput) (models.Event, error)
 	UpdateState(id uint, input UpdateEventStateInput) (models.Event, error)
 	Delete(id uint) error
-	GetUsers(id uint) ([]models.User, error)
+	GetUsers(id uint) ([]UserWithExpenses, error)
 	AddUser(code string, user models.User) (models.Event, error)
 	CreateBalances(event models.Event) ([]models.Balance, error)
 	CreateTransactions(event models.Event) ([]models.Transaction, error)
@@ -75,6 +75,12 @@ var ErrConflict = errors.New("conflict")
 
 type ConflictError struct {
 	Message string
+}
+
+type UserWithExpenses struct {
+	models.User
+	ExpenseCount  int     `json:"expense_count"`
+	TotalExpenses float64 `json:"total_expenses"`
 }
 
 func (e *ConflictError) Error() string {

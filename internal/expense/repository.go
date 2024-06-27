@@ -27,6 +27,12 @@ func (r *Repository) FindByEventId(id uint) ([]models.Expense, error) {
 	return expenses, result.Error
 }
 
+func (r *Repository) FindByUserIdAndEventId(userID uint, eventID uint) ([]models.Expense, error) {
+	var expenses []models.Expense
+	result := r.db.Where("author_id = ? AND event_id = ?", userID, eventID).Find(&expenses)
+	return expenses, result.Error
+}
+
 func (r *Repository) FindOne(id uint) (models.Expense, error) {
 	var expense models.Expense
 	result := r.db.Preload(clause.Associations).Where("id = ?", id).First(&expense)
