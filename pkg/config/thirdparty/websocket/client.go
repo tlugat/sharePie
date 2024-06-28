@@ -247,7 +247,7 @@ func (c *Client) refreshBalances(event models.Event) {
 }
 
 func (c *Client) refreshTransactions(event models.Event) {
-	transactions, err := c.hub.eventService.CreateTransactions(event)
+	transactions, err := c.hub.eventService.GetTransactions(event)
 	if err != nil {
 		fmt.Println("Failed to create transactions:", err)
 		return

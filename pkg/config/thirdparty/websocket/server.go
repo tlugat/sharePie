@@ -129,5 +129,25 @@ func initRoomMessages(client *Client) {
 		} else {
 			fmt.Println("Failed to get event balances:", err)
 		}
+
+		transactions, err := client.hub.eventService.GetTransactions(event)
+		if err == nil {
+			transactionsJSON, err := json.Marshal(transactions)
+			if err == nil {
+				transactionsMessage, err := json.Marshal(Message{
+					Type:    "transactions",
+					Payload: transactionsJSON,
+				})
+				if err == nil {
+					client.hub.rooms[client.room].broadcast <- transactionsMessage
+				} else {
+					fmt.Println("Failed to marshal transactions message:", err)
+				}
+			} else {
+				fmt.Println("Failed to marshal transactions:", err)
+			}
+		} else {
+			fmt.Println("Failed to get event transactions:", err)
+		}
 	}
 }

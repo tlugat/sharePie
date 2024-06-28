@@ -80,13 +80,13 @@ func (r *Repository) CreateTransactions(transactions []models.Transaction) error
 
 func (r *Repository) FindBalances(event models.Event) ([]models.Balance, error) {
 	var balances []models.Balance
-	result := r.db.Preload("User").Where("event_id = ?", event.ID).Find(&balances)
+	result := r.db.Preload("User.Avatar").Where("event_id = ?", event.ID).Find(&balances)
 	return balances, result.Error
 }
 
 func (r *Repository) FindTransactions(event models.Event) ([]models.Transaction, error) {
 	var transactions []models.Transaction
-	result := r.db.Preload("From").Preload("To").Where("event_id = ?", event.ID).Find(&transactions)
+	result := r.db.Preload("From.Avatar").Preload("To.Avatar").Where("event_id = ?", event.ID).Find(&transactions)
 	return transactions, result.Error
 }
 

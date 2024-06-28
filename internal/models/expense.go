@@ -15,6 +15,6 @@ type Expense struct {
 	Author       User          `json:"author" gorm:"foreignKey:AuthorID"`
 	Payers       []Payer       `json:"payers" gorm:"foreignKey:ExpenseID"`
 	Participants []Participant `json:"participants" gorm:"foreignKey:ExpenseID"`
-	Amount       float64       `string:"cost"`
+	Amount       float64       `json:"amount"`
 	EventID      uint          `json:"eventId"`
 }
