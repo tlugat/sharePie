@@ -7,7 +7,7 @@ type Transaction struct {
 	ToUserID   uint    `json:"-" gorm:"column:to;not null"`
 	To         User    `json:"to" gorm:"foreignKey:ToUserID;references:ID;"`
 	Amount     float64 `json:"amount"`
-	EventID    uint    `json:"event_id" gorm:"not null"`
+	EventID    uint    `json:"eventId" gorm:"not null"`
 	Event      Event   `json:"-" gorm:"foreignKey:EventID;references:ID"`
 	Completed  bool    `json:"completed"`
 }

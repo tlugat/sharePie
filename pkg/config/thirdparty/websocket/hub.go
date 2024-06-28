@@ -35,7 +35,8 @@ func NewHub(db *gorm.DB) *Hub {
 		userRepository,
 		participantRepository,
 		payerRepository,
-		eventRepository)
+		eventRepository,
+	)
 
 	return &Hub{
 		rooms:          make(map[string]*Room),

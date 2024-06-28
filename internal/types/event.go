@@ -32,8 +32,6 @@ type IEventService interface {
 	Delete(id uint) error
 	GetUsers(id uint) ([]UserWithExpenses, error)
 	AddUser(code string, user models.User) (models.Event, error)
-	CreateBalances(event models.Event) ([]models.Balance, error)
-	CreateTransactions(event models.Event) ([]models.Transaction, error)
 	GetBalances(event models.Event) ([]models.Balance, error)
 	GetTransactions(event models.Event) ([]models.Transaction, error)
 	FindExpenses(id uint) ([]models.Expense, error)
