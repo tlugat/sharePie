@@ -50,6 +50,7 @@ func UserHandler(db *gorm.DB, route *gin.RouterGroup) {
 	route.GET("/users", middleware.IsAuthenticated(db), middleware.IsGranted(constants.AdminRole), userController.FindUsers)
 	route.GET("/users/:id", middleware.IsAuthenticated(db), userController.FindUser)
 	route.PATCH("/users/me", middleware.IsAuthenticated(db), userController.UpdateCurrentUser)
+	route.PATCH("/users/firebase_token", middleware.IsAuthenticated(db), userController.UpdateCurrentUserFirebaseToken)
 	route.PATCH("/users/:id", middleware.IsAuthenticated(db), middleware.IsGranted(constants.AdminRole), userController.UpdateUser)
 	route.DELETE("/users/:id", middleware.IsAuthenticated(db), middleware.IsGranted(constants.AdminRole), userController.DeleteUser)
 	route.GET("/users/me", middleware.IsAuthenticated(db), userController.GetUserFromToken)

@@ -16,6 +16,7 @@ import (
 	"sharePie-api/pkg/config/database"
 	"sharePie-api/pkg/config/env"
 	"sharePie-api/pkg/config/thirdparty/cloudinary"
+	firebase2 "sharePie-api/pkg/config/thirdparty/firebase"
 	websocket2 "sharePie-api/pkg/config/thirdparty/websocket"
 	"syscall"
 	"time"
@@ -32,6 +33,11 @@ func main() {
 	err := env.Load()
 	if err != nil {
 		log.Fatalf("Failed to load environment variables : %v", err)
+	}
+
+	err = firebase2.InitFirebase()
+	if err != nil {
+		log.Fatalf("Failed to initialize Firebase : %v", err)
 	}
 
 	db, err := database.NewPostgres()

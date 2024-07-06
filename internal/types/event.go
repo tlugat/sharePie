@@ -10,6 +10,7 @@ type IEventRepository interface {
 	FindOne(id uint) (models.Event, error)
 	Create(event models.Event) (models.Event, error)
 	Update(event models.Event) (models.Event, error)
+	UpdateUsers(event models.Event) ([]models.User, error)
 	Delete(id uint) error
 	FindOneByCode(code string) (models.Event, error)
 	FindUsers(id uint) ([]models.User, error)

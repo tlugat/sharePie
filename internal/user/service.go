@@ -1,7 +1,6 @@
 package user
 
 import (
-	"fmt"
 	"sharePie-api/internal/models"
 	"sharePie-api/internal/types"
 	"sharePie-api/pkg/constants"
@@ -69,7 +68,19 @@ func (service *Service) Update(id uint, input types.UpdateUserInput) (models.Use
 		user.Avatar = avatar
 	}
 
-	fmt.Println("user", user)
+	return service.Repository.Update(user)
+}
+
+func (service *Service) UpdateFirebaseToken(id uint, input types.UpdateUserFirebaseTokenInput) (models.User, error) {
+	user, err := service.Repository.FindOneById(id)
+
+	if err != nil {
+		return models.User{}, err
+	}
+
+	if input.FirebaseToken != "" {
+		user.FirebaseToken = &input.FirebaseToken
+	}
 
 	return service.Repository.Update(user)
 }

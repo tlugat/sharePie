@@ -43,6 +43,11 @@ func (r *Repository) Update(event models.Event) (models.Event, error) {
 	return event, result.Error
 }
 
+func (r *Repository) UpdateUsers(event models.Event) ([]models.User, error) {
+	err := r.db.Model(&event).Association("Users").Replace(&event.Users)
+	return event.Users, err
+}
+
 func (r *Repository) Delete(id uint) error {
 	result := r.db.Delete(&models.Event{}, id)
 	return result.Error
