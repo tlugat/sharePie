@@ -8,6 +8,7 @@ type IUserService interface {
 	FindOneByEmail(email string) (models.User, error)
 	Create(input CreateUserInput) (models.User, error)
 	Update(id uint, input UpdateUserInput) (models.User, error)
+	UpdateFirebaseToken(id uint, input UpdateUserFirebaseTokenInput) (models.User, error)
 	Delete(id uint) error
 }
 
@@ -32,4 +33,8 @@ type UpdateUserInput struct {
 	Username string `json:"username"`
 	Avatar   uint   `json:"avatar"`
 	Email    string `json:"email"`
+}
+
+type UpdateUserFirebaseTokenInput struct {
+	FirebaseToken string `json:"firebaseToken" binding:"required"`
 }

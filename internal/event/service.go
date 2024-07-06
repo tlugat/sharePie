@@ -2,10 +2,13 @@ package event
 
 import (
 	"errors"
+	"firebase.google.com/go/v4/messaging"
+	"log"
 	"math/rand"
 	models2 "sharePie-api/internal/models"
 	"sharePie-api/internal/types"
 	"sharePie-api/pkg/config/thirdparty/cloudinary"
+	"sharePie-api/pkg/config/thirdparty/firebase"
 	"strings"
 	"time"
 )
@@ -186,7 +189,7 @@ func (service *Service) AddUser(code string, user models2.User) (models2.Event, 
 		return models2.Event{}, errors.New("Event is not active")
 	}
 
-	users, err := service.UserRepository.FindByEventId(event.ID)
+	users, err := service.Repository.FindUsers(event.ID)
 	if err != nil {
 		return models2.Event{}, err
 	}
@@ -205,8 +208,26 @@ func (service *Service) AddUser(code string, user models2.User) (models2.Event, 
 
 	event.Users = append(users, user)
 
-	_, err = service.Repository.Update(event)
+	_, err = service.Repository.UpdateUsers(event)
 	if err != nil {
+		return models2.Event{}, err
+	}
+
+	notification := messaging.Notification{
+		Title: "An astronaut joined the event!",
+		Body:  user.Username + " joined " + event.Name,
+	}
+
+	usersTokens := make([]*string, 0)
+	for _, u := range users {
+		if u.ID != user.ID {
+			usersTokens = append(usersTokens, u.FirebaseToken)
+		}
+	}
+
+	err = firebase.SendNotification(usersTokens, notification)
+	if err != nil {
+		log.Println("Failed to send notification:", err)
 		return models2.Event{}, err
 	}
 

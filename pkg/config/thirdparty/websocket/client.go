@@ -2,11 +2,13 @@ package websocket
 
 import (
 	"encoding/json"
+	"firebase.google.com/go/v4/messaging"
 	"fmt"
 	"github.com/gorilla/websocket"
 	"log"
 	"sharePie-api/internal/models"
 	"sharePie-api/internal/types"
+	"sharePie-api/pkg/config/thirdparty/firebase"
 	"strconv"
 	"time"
 )
@@ -140,10 +142,40 @@ func (c *Client) handleCreateExpense(payload json.RawMessage) {
 		return
 	}
 
-	_, err := c.hub.expenseService.Create(input, c.user)
+	expense, err := c.hub.expenseService.Create(input, c.user)
 	if err != nil {
 		fmt.Println("Failed to create expense:", err)
 		return
+	}
+
+	event, err := c.hub.eventService.FindOne(expense.EventID)
+	if err != nil {
+		fmt.Println("Failed to get event:", err)
+		return
+	}
+
+	eventUsers, err := c.hub.eventService.GetUsers(expense.EventID)
+	if err != nil {
+		fmt.Println("Failed to get event users:", err)
+		return
+	}
+
+	usersTokens := make([]*string, 0)
+	for _, user := range eventUsers {
+		if user.ID != c.user.ID {
+			usersTokens = append(usersTokens, user.FirebaseToken)
+		}
+	}
+
+	notification := messaging.Notification{
+		Title: fmt.Sprintf("New expense added to %s", event.Name),
+		Body:  fmt.Sprintf("%s, Amount: %.2f", expense.Name, expense.Amount),
+	}
+
+	err = firebase.SendNotification(usersTokens, notification)
+
+	if err != nil {
+		fmt.Println("Failed to send notification:", err)
 	}
 
 	c.refreshExpenses()

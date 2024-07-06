@@ -109,6 +109,35 @@ func (controller *Controller) UpdateCurrentUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": user})
 }
 
+// UpdateCurrentUserFirebaseToken updates an existing user.
+// @Summary Update a user
+// @Description Updates an existing user with new data
+// @Tags Users
+// @Accept  json
+// @Produce  json
+// @Param id path int true "User ID"
+// @Param input body services.UpdateCurrentUserInput true "User update data"
+// @Success 200 {object} map[string]interface{} "Returns the updated user"
+// @Failure 400 {object} map[string]interface{} "Returns an error if the input is invalid or the user does not exist"
+// @Router /users/ [put]
+func (controller *Controller) UpdateCurrentUserFirebaseToken(c *gin.Context) {
+	contextUser, ok := auth.GetUserFromContext(c)
+	if !ok {
+		return
+	}
+	var input types.UpdateUserFirebaseTokenInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	user, err := controller.userService.UpdateFirebaseToken(contextUser.ID, input)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": user})
+}
+
 // DeleteUser removes a user.
 // @Summary Delete a user
 // @Description Deletes a user from the database
