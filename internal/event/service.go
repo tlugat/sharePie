@@ -97,6 +97,11 @@ func (service *Service) Update(id uint, input types.UpdateEventInput) (models2.E
 		event.Description = input.Description
 	}
 	if input.Category != 0 {
+		category, err := service.CategoryRepository.FindOne(input.Category)
+		if err != nil {
+			return models2.Event{}, err
+		}
+		event.Category = category
 		event.CategoryID = input.Category
 	}
 	if input.Image != "" {
