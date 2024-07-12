@@ -40,6 +40,15 @@ func (service *Service) Find() ([]models2.Event, error) {
 		return nil, err
 	}
 
+	for i, event := range events {
+		users, err := service.GetUsers(event.ID)
+		if err != nil {
+			return nil, err
+		}
+		userCount := len(users)
+		events[i].UserCount = userCount
+	}
+
 	return events, nil
 }
 
@@ -278,5 +287,15 @@ func (service *Service) FindByUser(id uint) ([]models2.Event, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	for i, event := range events {
+		users, err := service.GetUsers(event.ID)
+		if err != nil {
+			return nil, err
+		}
+		userCount := len(users)
+		events[i].UserCount = userCount
+	}
+
 	return events, nil
 }
