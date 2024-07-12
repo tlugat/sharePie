@@ -19,6 +19,7 @@ type Event struct {
 	Expenses    []Expense  `json:"-"`
 	Code        string     `json:"code" gorm:"unique"`
 	State       EventState `json:"state"`
+	UserCount   int        `json:"userCount" gorm:"-"`
 }
 
 type EventState string
