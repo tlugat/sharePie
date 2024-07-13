@@ -31,12 +31,15 @@ import (
 // @BasePath /api/v1
 // @query.collection.format multi
 func main() {
-	err := env.Load()
-	if err != nil {
-		log.Fatalf("Failed to load environment variables : %v", err)
+	envMode := os.Getenv("ENV")
+	if envMode != "production" {
+		err := env.Load()
+		if err != nil {
+			log.Fatalf("Failed to load environment variables : %v", err)
+		}
 	}
 
-	err = firebase2.InitFirebase()
+	err := firebase2.InitFirebase()
 	if err != nil {
 		log.Fatalf("Failed to initialize Firebase : %v", err)
 	}
