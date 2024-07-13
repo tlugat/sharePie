@@ -59,7 +59,7 @@ func (controller *Controller) FindAvatar(c *gin.Context) {
 // @Tags Avatars
 // @Accept  json
 // @Produce  json
-// @Param input body services.CreateAvatarInput true "Avatar creation data"
+// @Param input body types.CreateAvatarInput true "Avatar creation data"
 // @Success 200 {object} map[string]interface{} "Returns the newly created avatar"
 // @Failure 400 {object} map[string]interface{} "Returns an error if the input is invalid or user authentication fails"
 // @Router /avatars [post]
@@ -85,10 +85,10 @@ func (controller *Controller) CreateAvatar(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path int true "Avatar ID"
-// @Param input body services.UpdateAvatarInput true "Avatar update data"
+// @Param input body types.UpdateAvatarInput true "Avatar update data"
 // @Success 200 {object} map[string]interface{} "Returns the updated avatar"
 // @Failure 400 {object} map[string]interface{} "Returns an error if the input is invalid or the avatar does not exist"
-// @Router /avatars/{id} [put]
+// @Router /avatars/{id} [patch]
 func (controller *Controller) UpdateAvatar(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	var input types.UpdateAvatarInput

@@ -80,7 +80,7 @@ func (controller *Controller) FindEvent(c *gin.Context) {
 // @Tags Events
 // @Accept  json
 // @Produce  json
-// @Param input body services.CreateEventInput true "Event creation data"
+// @Param input body types.CreateEventInput true "Event creation data"
 // @Success 200 {object} map[string]interface{} "Returns the newly created event"
 // @Failure 400 {object} map[string]interface{} "Returns an error if the input is invalid or user authentication fails"
 // @Router /events [post]
@@ -112,10 +112,10 @@ func (controller *Controller) CreateEvent(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path int true "Event ID"
-// @Param input body services.UpdateEventInput true "Event update data"
+// @Param input body types.UpdateEventInput true "Event update data"
 // @Success 200 {object} map[string]interface{} "Returns the updated event"
 // @Failure 400 {object} map[string]interface{} "Returns an error if the input is invalid or the event does not exist"
-// @Router /events/{id} [put]
+// @Router /events/{id} [patch]
 func (controller *Controller) UpdateEvent(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	var input types.UpdateEventInput
@@ -132,16 +132,16 @@ func (controller *Controller) UpdateEvent(c *gin.Context) {
 }
 
 // UpdateEventState updates an existing event.
-// @Summary Update an event
-// @Description Updates an existing event with new data
+// @Summary Update event state
+// @Description Updates the state of an existing event
 // @Tags Events
 // @Accept  json
 // @Produce  json
 // @Param id path int true "Event ID"
-// @Param input body services.UpdateEventStateInput true "Event update data"
+// @Param input body types.UpdateEventStateInput true "Event state update data"
 // @Success 200 {object} map[string]interface{} "Returns the updated event"
 // @Failure 400 {object} map[string]interface{} "Returns an error if the input is invalid or the event does not exist"
-// @Router /events/{id} [put]
+// @Router /events/{id}/state [patch]
 func (controller *Controller) UpdateEventState(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	var input types.UpdateEventStateInput
@@ -228,15 +228,15 @@ func (controller *Controller) GetEventBalances(c *gin.Context) {
 }
 
 // GetEventTransactions retrieves a list of transactions for an event.
-// // @Summary Get event transactions
-// // @Description Retrieves a list of transactions for a specified event
-// // @Tags Events
-// // @Accept  json
-// // @Produce  json
-// // @Param id path int true "Event ID"
-// // @Success 200 {object} map[string]interface{} "Returns a list of transactions for the event"
-// // @Failure 400 {object} map[string]interface{} "Returns an error if the event does not exist"
-// // @Router /events/{id}/transactions [get]
+// @Summary Get event transactions
+// @Description Retrieves a list of transactions for a specified event
+// @Tags Events
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Event ID"
+// @Success 200 {object} map[string]interface{} "Returns a list of transactions for the event"
+// @Failure 400 {object} map[string]interface{} "Returns an error if the event does not exist"
+// @Router /events/{id}/transactions [get]
 func (controller *Controller) GetEventTransactions(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	event, err := controller.eventService.FindOne(uint(id))
@@ -256,6 +256,17 @@ func (controller *Controller) GetEventTransactions(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": transactions})
 }
 
+// JoinEvent allows a user to join an event.
+// @Summary Join an event
+// @Description Allows a user to join an event using a code
+// @Tags Events
+// @Accept  json
+// @Produce  json
+// @Param input body types.JoinEventInput true "Join event data"
+// @Success 200 {object} map[string]interface{} "Returns the joined event"
+// @Failure 400 {object} map[string]interface{} "Returns an error if the input is invalid"
+// @Failure 409 {object} map[string]interface{} "Returns an error if there is a conflict (e.g., user already joined)"
+// @Router /events/join [post]
 func (controller *Controller) JoinEvent(c *gin.Context) {
 	var input types.JoinEventInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -283,6 +294,16 @@ func (controller *Controller) JoinEvent(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": event})
 }
 
+// GetExpenses retrieves a list of expenses for an event.
+// @Summary Get event expenses
+// @Description Retrieves a list of expenses for a specified event
+// @Tags Events
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Event ID"
+// @Success 200 {object} map[string]interface{} "Returns a list of expenses for the event"
+// @Failure 400 {object} map[string]interface{} "Returns an error if the event does not exist"
+// @Router /events/{id}/expenses [get]
 func (controller *Controller) GetExpenses(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 

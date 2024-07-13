@@ -59,7 +59,7 @@ func (controller *Controller) FindCategory(c *gin.Context) {
 // @Tags Categories
 // @Accept  json
 // @Produce  json
-// @Param input body services.CreateCategoryInput true "Category creation data"
+// @Param input body types.CreateCategoryInput true "Category creation data"
 // @Success 200 {object} map[string]interface{} "Returns the newly created category"
 // @Failure 400 {object} map[string]interface{} "Returns an error if the input is invalid"
 // @Router /categories [post]
@@ -84,7 +84,7 @@ func (controller *Controller) CreateCategory(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path int true "Category ID"
-// @Param input body services.UpdateCategoryInput true "Category update data"
+// @Param input body types.UpdateCategoryInput true "Category update data"
 // @Success 200 {object} map[string]interface{} "Returns the updated category"
 // @Failure 400 {object} map[string]interface{} "Returns an error if the input is invalid or the category does not exist"
 // @Router /categories/{id} [put]

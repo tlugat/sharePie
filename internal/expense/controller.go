@@ -60,7 +60,7 @@ func (controller *Controller) FindExpense(c *gin.Context) {
 // @Tags Expenses
 // @Accept  json
 // @Produce  json
-// @Param input body services.CreateExpenseInput true "Expense creation data"
+// @Param input body types.CreateExpenseInput true "Expense creation data"
 // @Success 200 {object} map[string]interface{} "Returns the newly created expense"
 // @Failure 400 {object} map[string]interface{} "Returns an error if the input is invalid or user authentication fails"
 // @Router /expenses [post]
@@ -92,10 +92,10 @@ func (controller *Controller) CreateExpense(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path int true "Expense ID"
-// @Param input body services.UpdateExpenseInput true "Expense update data"
+// @Param input body types.UpdateExpenseInput true "Expense update data"
 // @Success 200 {object} map[string]interface{} "Returns the updated expense"
 // @Failure 400 {object} map[string]interface{} "Returns an error if the input is invalid or the expense does not exist"
-// @Router /expenses/{id} [put]
+// @Router /expenses/{id} [patch]
 func (controller *Controller) UpdateExpense(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	var input types.UpdateExpenseInput
