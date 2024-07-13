@@ -23,5 +23,5 @@ type CreateTagInput struct {
 }
 
 type UpdateTagInput struct {
-	Name string `json:"title"`
+	Name string `json:"name" binding:"required"`
 }

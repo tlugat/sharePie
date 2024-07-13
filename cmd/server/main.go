@@ -62,7 +62,7 @@ func main() {
 	// Configure CORS
 	corsConfig := cors.Config{
 		AllowOrigins:     []string{os.Getenv("CORS_ORIGIN")},
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowMethods:     []string{"GET", "POST", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,

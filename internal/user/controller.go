@@ -54,6 +54,30 @@ func (controller *Controller) FindUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": user})
 }
 
+// CreateUser creates a new user.
+// @Summary Create a new user
+// @Description Creates a new user in the database
+// @Tags Users
+// @Accept  json
+// @Produce  json
+// @Param input body types.CreateUserInput true "User creation data"
+// @Success 201 {object} map[string]interface{} "Returns the created user"
+// @Failure 400 {object} map[string]interface{} "Returns an error if the input is invalid"
+// @Router /users [post]
+func (controller *Controller) CreateUser(c *gin.Context) {
+	var input types.CreateUserInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	user, err := controller.userService.Create(input)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"data": user})
+}
+
 // UpdateUser updates an existing user.
 // @Summary Update a user
 // @Description Updates an existing user with new data

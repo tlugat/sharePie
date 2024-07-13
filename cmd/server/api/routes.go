@@ -47,6 +47,7 @@ func UserHandler(db *gorm.DB, route *gin.RouterGroup) {
 	userService := user.NewService(userRepository, avatarRepository)
 	userController := user.NewController(userService)
 
+	route.POST("/users", middleware.IsAuthenticated(db), middleware.IsGranted(constants.AdminRole), userController.CreateUser)
 	route.GET("/users", middleware.IsAuthenticated(db), middleware.IsGranted(constants.AdminRole), userController.FindUsers)
 	route.GET("/users/:id", middleware.IsAuthenticated(db), userController.FindUser)
 	route.PATCH("/users/me", middleware.IsAuthenticated(db), userController.UpdateCurrentUser)
