@@ -1,3 +1,4 @@
 .idea
 .env*
 firebase.config.json
+DS_Store
