@@ -1,6 +1,5 @@
-basePath: /api/v1
 definitions:
-  controllers.LoginInput:
+  auth.LoginInput:
     properties:
       email:
         type: string
@@ -10,14 +9,48 @@ definitions:
     - email
     - password
     type: object
-  services.CreateCategoryInput:
+  models.EventState:
+    enum:
+    - active
+    - archived
+    type: string
+    x-enum-varnames:
+    - EventStateActive
+    - EventStateArchived
+  types.CreateAchievementInput:
+    properties:
+      condition:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+      points:
+        type: integer
+    required:
+    - condition
+    - description
+    - name
+    - points
+    type: object
+  types.CreateAvatarInput:
+    properties:
+      name:
+        type: string
+      url:
+        type: string
+    required:
+    - name
+    - url
+    type: object
+  types.CreateCategoryInput:
     properties:
       name:
         type: string
     required:
     - name
     type: object
-  services.CreateEventInput:
+  types.CreateEventInput:
     properties:
       category:
         type: integer
@@ -33,7 +66,7 @@ definitions:
     - description
     - name
     type: object
-  services.CreateExpenseInput:
+  types.CreateExpenseInput:
     properties:
       amount:
         type: number
@@ -45,6 +78,14 @@ definitions:
         type: string
       name:
         type: string
+      participants:
+        items:
+          $ref: '#/definitions/types.ParticipantInput'
+        type: array
+      payers:
+        items:
+          $ref: '#/definitions/types.PayerInput'
+        type: array
       tag:
         type: integer
     required:
@@ -52,36 +93,74 @@ definitions:
     - description
     - event
     - name
+    - participants
+    - payers
     type: object
-  services.CreateTagInput:
+  types.CreateTagInput:
     properties:
       name:
         type: string
     required:
     - name
     type: object
-  services.CreateUserInput:
+  types.CreateUserInput:
     properties:
       email:
         type: string
-      firstName:
-        type: string
-      lastName:
-        type: string
       password:
+        type: string
+      username:
         type: string
     required:
     - email
-    - firstName
-    - lastName
     - password
+    - username
     type: object
-  services.UpdateCategoryInput:
+  types.JoinEventInput:
+    properties:
+      code:
+        type: string
+    required:
+    - code
+    type: object
+  types.ParticipantInput:
+    properties:
+      amount:
+        type: number
+      id:
+        type: integer
+    type: object
+  types.PayerInput:
+    properties:
+      amount:
+        type: number
+      id:
+        type: integer
+    type: object
+  types.UpdateAchievementInput:
+    properties:
+      condition:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+      points:
+        type: integer
+    type: object
+  types.UpdateAvatarInput:
+    properties:
+      name:
+        type: string
+      url:
+        type: string
+    type: object
+  types.UpdateCategoryInput:
     properties:
       name:
         type: string
     type: object
-  services.UpdateEventInput:
+  types.UpdateEventInput:
     properties:
       category:
         type: integer
@@ -93,8 +172,19 @@ definitions:
         type: string
       name:
         type: string
+      users:
+        items:
+          type: integer
+        type: array
     type: object
-  services.UpdateExpenseInput:
+  types.UpdateEventStateInput:
+    properties:
+      state:
+        $ref: '#/definitions/models.EventState'
+    required:
+    - state
+    type: object
+  types.UpdateExpenseInput:
     properties:
       amount:
         type: number
@@ -102,24 +192,40 @@ definitions:
         type: integer
       description:
         type: string
+      id:
+        type: integer
       image:
         type: string
       name:
         type: string
-    required:
-    - amount
-    - name
+      participants:
+        items:
+          $ref: '#/definitions/types.ParticipantInput'
+        type: array
+      payers:
+        items:
+          $ref: '#/definitions/types.PayerInput'
+        type: array
     type: object
-  services.UpdateTagInput:
+  types.UpdateTagInput:
     properties:
       title:
         type: string
     type: object
-  services.UpdateUserInput:
+  types.UpdateUserFirebaseTokenInput:
     properties:
-      firstName:
+      firebaseToken:
         type: string
-      lastName:
+    required:
+    - firebaseToken
+    type: object
+  types.UpdateUserInput:
+    properties:
+      avatar:
+        type: integer
+      email:
+        type: string
+      username:
         type: string
     type: object
 host: localhost:8080
@@ -130,6 +236,142 @@ info:
   title: SharePie API
   version: "1.0"
 paths:
+  /achievements:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of all achievements from the database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns a list of achievements
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Returns an error if the request fails
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List all achievements
+      tags:
+      - Achievements
+    post:
+      consumes:
+      - application/json
+      description: Adds a new achievement to the database, linked to the authenticated
+        user
+      parameters:
+      - description: Achievement creation data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/types.CreateAchievementInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns the newly created achievement
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Returns an error if the input is invalid or user authentication
+            fails
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Add a new achievement
+      tags:
+      - Achievements
+  /achievements/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes an achievement from the database
+      parameters:
+      - description: Achievement ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Confirms successful deletion
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Returns an error if the achievement cannot be deleted
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete an achievement
+      tags:
+      - Achievements
+    get:
+      consumes:
+      - application/json
+      description: Retrieves an achievement by its ID from the database
+      parameters:
+      - description: Achievement ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns the specified achievement
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Returns an error if the achievement is not found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get a single achievement
+      tags:
+      - Achievements
+    patch:
+      consumes:
+      - application/json
+      description: Updates an existing achievement with new data
+      parameters:
+      - description: Achievement ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Achievement update data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/types.UpdateAchievementInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns the updated achievement
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Returns an error if the input is invalid or the achievement
+            does not exist
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update an achievement
+      tags:
+      - Achievements
   /auth/login:
     post:
       consumes:
@@ -141,7 +383,7 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/controllers.LoginInput'
+          $ref: '#/definitions/auth.LoginInput'
       produces:
       - application/json
       responses:
@@ -169,7 +411,7 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/services.CreateUserInput'
+          $ref: '#/definitions/types.CreateUserInput'
       produces:
       - application/json
       responses:
@@ -207,6 +449,142 @@ paths:
       summary: Validate a user
       tags:
       - Auth
+  /avatars:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of all avatars from the database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns a list of avatars
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Returns an error if the request fails
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List all avatars
+      tags:
+      - Avatars
+    post:
+      consumes:
+      - application/json
+      description: Adds a new avatar to the database, linked to the authenticated
+        user
+      parameters:
+      - description: Avatar creation data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/types.CreateAvatarInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns the newly created avatar
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Returns an error if the input is invalid or user authentication
+            fails
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Add a new avatar
+      tags:
+      - Avatars
+  /avatars/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes an avatar from the database
+      parameters:
+      - description: Avatar ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Confirms successful deletion
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Returns an error if the avatar cannot be deleted
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete an avatar
+      tags:
+      - Avatars
+    get:
+      consumes:
+      - application/json
+      description: Retrieves an avatar by its ID from the database
+      parameters:
+      - description: Avatar ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns the specified avatar
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Returns an error if the avatar is not found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get a single avatar
+      tags:
+      - Avatars
+    patch:
+      consumes:
+      - application/json
+      description: Updates an existing avatar with new data
+      parameters:
+      - description: Avatar ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Avatar update data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/types.UpdateAvatarInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns the updated avatar
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Returns an error if the input is invalid or the avatar does
+            not exist
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update an avatar
+      tags:
+      - Avatars
   /categories:
     get:
       consumes:
@@ -238,7 +616,7 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/services.CreateCategoryInput'
+          $ref: '#/definitions/types.CreateCategoryInput'
       produces:
       - application/json
       responses:
@@ -323,7 +701,7 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/services.UpdateCategoryInput'
+          $ref: '#/definitions/types.UpdateCategoryInput'
       produces:
       - application/json
       responses:
@@ -372,7 +750,7 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/services.CreateEventInput'
+          $ref: '#/definitions/types.CreateEventInput'
       produces:
       - application/json
       responses:
@@ -443,7 +821,7 @@ paths:
       summary: Get a single event
       tags:
       - Events
-    put:
+    patch:
       consumes:
       - application/json
       description: Updates an existing event with new data
@@ -458,7 +836,7 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/services.UpdateEventInput'
+          $ref: '#/definitions/types.UpdateEventInput'
       produces:
       - application/json
       responses:
@@ -476,12 +854,11 @@ paths:
       summary: Update an event
       tags:
       - Events
-  /events/{id}/balance:
+  /events/{id}/expenses:
     get:
       consumes:
       - application/json
-      description: Retrieves a summary of the event's balance, including the total
-        goal, total expenses, and the balance
+      description: Retrieves a list of expenses for a specified event
       parameters:
       - description: Event ID
         in: path
@@ -492,7 +869,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: Returns the event's balance summary
+          description: Returns a list of expenses for the event
           schema:
             additionalProperties: true
             type: object
@@ -501,7 +878,156 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      summary: Get event balance summary
+      summary: Get event expenses
+      tags:
+      - Events
+  /events/{id}/state:
+    patch:
+      consumes:
+      - application/json
+      description: Updates the state of an existing event
+      parameters:
+      - description: Event ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Event state update data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/types.UpdateEventStateInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns the updated event
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Returns an error if the input is invalid or the event does
+            not exist
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update event state
+      tags:
+      - Events
+  /events/{id}/summary:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a summary of balances for a specified event
+      parameters:
+      - description: Event ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns a list of balances for the event
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Returns an error if the event does not exist
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get event balance list
+      tags:
+      - Events
+  /events/{id}/transactions:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of transactions for a specified event
+      parameters:
+      - description: Event ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns a list of transactions for the event
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Returns an error if the event does not exist
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get event transactions
+      tags:
+      - Events
+  /events/{id}/users:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all users for a specified event
+      parameters:
+      - description: Event ID
+        in: path
+        name: eventId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns a list of users for the event
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Returns an error if the event does not exist
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get event users
+      tags:
+      - Events
+  /events/join:
+    post:
+      consumes:
+      - application/json
+      description: Allows a user to join an event using a code
+      parameters:
+      - description: Join event data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/types.JoinEventInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns the joined event
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Returns an error if the input is invalid
+          schema:
+            additionalProperties: true
+            type: object
+        "409":
+          description: Returns an error if there is a conflict (e.g., user already
+            joined)
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Join an event
       tags:
       - Events
   /expenses:
@@ -536,7 +1062,7 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/services.CreateExpenseInput'
+          $ref: '#/definitions/types.CreateExpenseInput'
       produces:
       - application/json
       responses:
@@ -607,7 +1133,7 @@ paths:
       summary: Get a single expense
       tags:
       - Expenses
-    put:
+    patch:
       consumes:
       - application/json
       description: Updates an existing expense with new data
@@ -622,7 +1148,7 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/services.UpdateExpenseInput'
+          $ref: '#/definitions/types.UpdateExpenseInput'
       produces:
       - application/json
       responses:
@@ -671,7 +1197,7 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/services.CreateTagInput'
+          $ref: '#/definitions/types.CreateTagInput'
       produces:
       - application/json
       responses:
@@ -741,7 +1267,7 @@ paths:
       summary: Get a single tag
       tags:
       - Tags
-    put:
+    patch:
       consumes:
       - application/json
       description: Updates an existing tag with new data
@@ -756,7 +1282,7 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/services.UpdateTagInput'
+          $ref: '#/definitions/types.UpdateTagInput'
       produces:
       - application/json
       responses:
@@ -848,7 +1374,7 @@ paths:
       summary: Get a single user
       tags:
       - Users
-    put:
+    patch:
       consumes:
       - application/json
       description: Updates an existing user with new data
@@ -863,7 +1389,7 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/services.UpdateUserInput'
+          $ref: '#/definitions/types.UpdateUserInput'
       produces:
       - application/json
       responses:
@@ -881,4 +1407,97 @@ paths:
       summary: Update a user
       tags:
       - Users
+  /users/firebase_token:
+    patch:
+      consumes:
+      - application/json
+      description: Updates an existing user with new data
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: User update data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/types.UpdateUserFirebaseTokenInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns the updated user
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Returns an error if the input is invalid or the user does not
+            exist
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update a user
+      tags:
+      - Users
+  /users/me:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the user from the token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns the user from the token
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Returns an error if the user cannot be retrieved
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get user from token
+      tags:
+      - Users
+    patch:
+      consumes:
+      - application/json
+      description: Updates an existing user with new data
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: User update data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/types.UpdateUserInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns the updated user
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Returns an error if the input is invalid or the user does not
+            exist
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update a user
+      tags:
+      - Users
+securityDefinitions:
+  Bearer:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

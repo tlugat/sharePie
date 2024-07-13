@@ -59,7 +59,7 @@ func (controller *Controller) FindAchievement(c *gin.Context) {
 // @Tags Achievements
 // @Accept  json
 // @Produce  json
-// @Param input body services.CreateAchievementInput true "Achievement creation data"
+// @Param input body types.CreateAchievementInput true "Achievement creation data"
 // @Success 200 {object} map[string]interface{} "Returns the newly created achievement"
 // @Failure 400 {object} map[string]interface{} "Returns an error if the input is invalid or user authentication fails"
 // @Router /achievements [post]
@@ -85,10 +85,10 @@ func (controller *Controller) CreateAchievement(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path int true "Achievement ID"
-// @Param input body services.UpdateAchievementInput true "Achievement update data"
+// @Param input body types.UpdateAchievementInput true "Achievement update data"
 // @Success 200 {object} map[string]interface{} "Returns the updated achievement"
 // @Failure 400 {object} map[string]interface{} "Returns an error if the input is invalid or the achievement does not exist"
-// @Router /achievements/{id} [put]
+// @Router /achievements/{id} [patch]
 func (controller *Controller) UpdateAchievement(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	var input types.UpdateAchievementInput

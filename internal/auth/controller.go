@@ -30,7 +30,7 @@ func NewController(service types.IUserService) *Controller {
 // @Tags Auth
 // @Accept  json
 // @Produce  json
-// @Param input body services.CreateUserInput true "User information"
+// @Param input body types.CreateUserInput true "User information"
 // @Success 200 {object} map[string]interface{} "Returns the created user"
 // @Failure 400 {object} map[string]interface{} "Returns an error if the input is invalid"
 // @Failure 500 {object} map[string]interface{} "Returns an error if the user creation fails"

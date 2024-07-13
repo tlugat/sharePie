@@ -61,10 +61,10 @@ func (controller *Controller) FindUser(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path int true "User ID"
-// @Param input body services.UpdateUserInput true "User update data"
+// @Param input body types.UpdateUserInput true "User update data"
 // @Success 200 {object} map[string]interface{} "Returns the updated user"
 // @Failure 400 {object} map[string]interface{} "Returns an error if the input is invalid or the user does not exist"
-// @Router /users/{id} [put]
+// @Router /users/{id} [patch]
 func (controller *Controller) UpdateUser(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	var input types.UpdateUserInput
@@ -87,10 +87,10 @@ func (controller *Controller) UpdateUser(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path int true "User ID"
-// @Param input body services.UpdateCurrentUserInput true "User update data"
+// @Param input body types.UpdateUserInput true "User update data"
 // @Success 200 {object} map[string]interface{} "Returns the updated user"
 // @Failure 400 {object} map[string]interface{} "Returns an error if the input is invalid or the user does not exist"
-// @Router /users/{id} [put]
+// @Router /users/me [patch]
 func (controller *Controller) UpdateCurrentUser(c *gin.Context) {
 	contextUser, ok := auth.GetUserFromContext(c)
 	if !ok {
@@ -116,10 +116,10 @@ func (controller *Controller) UpdateCurrentUser(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path int true "User ID"
-// @Param input body services.UpdateCurrentUserInput true "User update data"
+// @Param input body types.UpdateUserFirebaseTokenInput true "User update data"
 // @Success 200 {object} map[string]interface{} "Returns the updated user"
 // @Failure 400 {object} map[string]interface{} "Returns an error if the input is invalid or the user does not exist"
-// @Router /users/ [put]
+// @Router /users/firebase_token [patch]
 func (controller *Controller) UpdateCurrentUserFirebaseToken(c *gin.Context) {
 	contextUser, ok := auth.GetUserFromContext(c)
 	if !ok {

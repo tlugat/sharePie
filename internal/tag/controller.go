@@ -59,7 +59,7 @@ func (controller *Controller) FindTag(c *gin.Context) {
 // @Tags Tags
 // @Accept  json
 // @Produce  json
-// @Param input body services.CreateTagInput true "Tag creation data"
+// @Param input body types.CreateTagInput true "Tag creation data"
 // @Success 200 {object} map[string]interface{} "Returns the newly created tag"
 // @Failure 400 {object} map[string]interface{} "Returns an error if the input is invalid"
 // @Router /tags [post]
@@ -84,10 +84,10 @@ func (controller *Controller) CreateTag(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path int true "Tag ID"
-// @Param input body services.UpdateTagInput true "Tag update data"
+// @Param input body types.UpdateTagInput true "Tag update data"
 // @Success 200 {object} map[string]interface{} "Returns the updated tag"
 // @Failure 400 {object} map[string]interface{} "Returns an error if the input is invalid or the tag does not exist"
-// @Router /tags/{id} [put]
+// @Router /tags/{id} [patch]
 func (controller *Controller) UpdateTag(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	var input types.UpdateTagInput

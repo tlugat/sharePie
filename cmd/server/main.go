@@ -28,6 +28,9 @@ import (
 // @description This is the API of SharePie app. You can visit the GitHub repository at https://github.com/tlugat/sharePie-api
 
 // @host localhost:8080
+// @SecurityDefinitions.apiKey Bearer
+// @in header
+// @name Authorization
 // @BasePath /api/v1
 // @query.collection.format multi
 func main() {
@@ -102,9 +105,9 @@ func main() {
 	// Wait for interrupt signal to gracefully shutdown the server with
 	// a timeout of 5 seconds.
 	quit := make(chan os.Signal)
-	// kill (no param) default send syscanll.SIGTERM
+	// kill (no param) default send syscall.SIGTERM
 	// kill -2 is syscall.SIGINT
-	// kill -9 is syscall. SIGKILL but can"t be catch, so don't need add it
+	// kill -9 is syscall.SIGKILL but can"t be caught, so don't need add it
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 	log.Println("Shutdown Server ...")

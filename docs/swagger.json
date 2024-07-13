@@ -7,8 +7,203 @@
         "version": "1.0"
     },
     "host": "localhost:8080",
-    "basePath": "/api/v1",
     "paths": {
+        "/achievements": {
+            "get": {
+                "description": "Retrieves a list of all achievements from the database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Achievements"
+                ],
+                "summary": "List all achievements",
+                "responses": {
+                    "200": {
+                        "description": "Returns a list of achievements",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Returns an error if the request fails",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Adds a new achievement to the database, linked to the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Achievements"
+                ],
+                "summary": "Add a new achievement",
+                "parameters": [
+                    {
+                        "description": "Achievement creation data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.CreateAchievementInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns the newly created achievement",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Returns an error if the input is invalid or user authentication fails",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/achievements/{id}": {
+            "get": {
+                "description": "Retrieves an achievement by its ID from the database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Achievements"
+                ],
+                "summary": "Get a single achievement",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Achievement ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns the specified achievement",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Returns an error if the achievement is not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes an achievement from the database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Achievements"
+                ],
+                "summary": "Delete an achievement",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Achievement ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Confirms successful deletion",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Returns an error if the achievement cannot be deleted",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Updates an existing achievement with new data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Achievements"
+                ],
+                "summary": "Update an achievement",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Achievement ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Achievement update data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.UpdateAchievementInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns the updated achievement",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Returns an error if the input is invalid or the achievement does not exist",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/auth/login": {
             "post": {
                 "description": "Authenticates a user and returns a JWT token",
@@ -29,7 +224,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/controllers.LoginInput"
+                            "$ref": "#/definitions/auth.LoginInput"
                         }
                     }
                 ],
@@ -71,7 +266,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/services.CreateUserInput"
+                            "$ref": "#/definitions/types.CreateUserInput"
                         }
                     }
                 ],
@@ -116,6 +311,202 @@
                 "responses": {
                     "200": {
                         "description": "Returns the current user",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/avatars": {
+            "get": {
+                "description": "Retrieves a list of all avatars from the database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Avatars"
+                ],
+                "summary": "List all avatars",
+                "responses": {
+                    "200": {
+                        "description": "Returns a list of avatars",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Returns an error if the request fails",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Adds a new avatar to the database, linked to the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Avatars"
+                ],
+                "summary": "Add a new avatar",
+                "parameters": [
+                    {
+                        "description": "Avatar creation data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.CreateAvatarInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns the newly created avatar",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Returns an error if the input is invalid or user authentication fails",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/avatars/{id}": {
+            "get": {
+                "description": "Retrieves an avatar by its ID from the database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Avatars"
+                ],
+                "summary": "Get a single avatar",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Avatar ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns the specified avatar",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Returns an error if the avatar is not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes an avatar from the database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Avatars"
+                ],
+                "summary": "Delete an avatar",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Avatar ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Confirms successful deletion",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Returns an error if the avatar cannot be deleted",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Updates an existing avatar with new data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Avatars"
+                ],
+                "summary": "Update an avatar",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Avatar ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Avatar update data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.UpdateAvatarInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns the updated avatar",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Returns an error if the input is invalid or the avatar does not exist",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -173,7 +564,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/services.CreateCategoryInput"
+                            "$ref": "#/definitions/types.CreateCategoryInput"
                         }
                     }
                 ],
@@ -260,7 +651,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/services.UpdateCategoryInput"
+                            "$ref": "#/definitions/types.UpdateCategoryInput"
                         }
                     }
                 ],
@@ -369,7 +760,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/services.CreateEventInput"
+                            "$ref": "#/definitions/types.CreateEventInput"
                         }
                     }
                 ],
@@ -383,6 +774,55 @@
                     },
                     "400": {
                         "description": "Returns an error if the input is invalid or user authentication fails",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/events/join": {
+            "post": {
+                "description": "Allows a user to join an event using a code",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Events"
+                ],
+                "summary": "Join an event",
+                "parameters": [
+                    {
+                        "description": "Join event data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.JoinEventInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns the joined event",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Returns an error if the input is invalid",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "409": {
+                        "description": "Returns an error if there is a conflict (e.g., user already joined)",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -430,53 +870,6 @@
                     }
                 }
             },
-            "put": {
-                "description": "Updates an existing event with new data",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Events"
-                ],
-                "summary": "Update an event",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Event ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Event update data",
-                        "name": "input",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/services.UpdateEventInput"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Returns the updated event",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Returns an error if the input is invalid or the event does not exist",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            },
             "delete": {
                 "description": "Deletes an event from the database",
                 "consumes": [
@@ -514,11 +907,9 @@
                         }
                     }
                 }
-            }
-        },
-        "/events/{id}/balance": {
-            "get": {
-                "description": "Retrieves a summary of the event's balance, including the total goal, total expenses, and the balance",
+            },
+            "patch": {
+                "description": "Updates an existing event with new data",
                 "consumes": [
                     "application/json"
                 ],
@@ -528,7 +919,56 @@
                 "tags": [
                     "Events"
                 ],
-                "summary": "Get event balance summary",
+                "summary": "Update an event",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Event ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Event update data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.UpdateEventInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns the updated event",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Returns an error if the input is invalid or the event does not exist",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/events/{id}/expenses": {
+            "get": {
+                "description": "Retrieves a list of expenses for a specified event",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Events"
+                ],
+                "summary": "Get event expenses",
                 "parameters": [
                     {
                         "type": "integer",
@@ -540,7 +980,176 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Returns the event's balance summary",
+                        "description": "Returns a list of expenses for the event",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Returns an error if the event does not exist",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/events/{id}/state": {
+            "patch": {
+                "description": "Updates the state of an existing event",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Events"
+                ],
+                "summary": "Update event state",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Event ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Event state update data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.UpdateEventStateInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns the updated event",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Returns an error if the input is invalid or the event does not exist",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/events/{id}/summary": {
+            "get": {
+                "description": "Retrieves a summary of balances for a specified event",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Events"
+                ],
+                "summary": "Get event balance list",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Event ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a list of balances for the event",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Returns an error if the event does not exist",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/events/{id}/transactions": {
+            "get": {
+                "description": "Retrieves a list of transactions for a specified event",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Events"
+                ],
+                "summary": "Get event transactions",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Event ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a list of transactions for the event",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Returns an error if the event does not exist",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/events/{id}/users": {
+            "get": {
+                "description": "Retrieves all users for a specified event",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Events"
+                ],
+                "summary": "Get event users",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Event ID",
+                        "name": "eventId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a list of users for the event",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -605,7 +1214,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/services.CreateExpenseInput"
+                            "$ref": "#/definitions/types.CreateExpenseInput"
                         }
                     }
                 ],
@@ -666,53 +1275,6 @@
                     }
                 }
             },
-            "put": {
-                "description": "Updates an existing expense with new data",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Expenses"
-                ],
-                "summary": "Update an expense",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Expense ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Expense update data",
-                        "name": "input",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/services.UpdateExpenseInput"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Returns the updated expense",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Returns an error if the input is invalid or the expense does not exist",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            },
             "delete": {
                 "description": "Deletes an expense from the database",
                 "consumes": [
@@ -744,6 +1306,53 @@
                     },
                     "400": {
                         "description": "Returns an error if the expense cannot be deleted",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Updates an existing expense with new data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Expenses"
+                ],
+                "summary": "Update an expense",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Expense ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Expense update data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.UpdateExpenseInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns the updated expense",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Returns an error if the input is invalid or the expense does not exist",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -801,7 +1410,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/services.CreateTagInput"
+                            "$ref": "#/definitions/types.CreateTagInput"
                         }
                     }
                 ],
@@ -862,53 +1471,6 @@
                     }
                 }
             },
-            "put": {
-                "description": "Updates an existing tag with new data",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Tags"
-                ],
-                "summary": "Update a tag",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Tag ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Tag update data",
-                        "name": "input",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/services.UpdateTagInput"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Returns the updated tag",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Returns an error if the input is invalid or the tag does not exist",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            },
             "delete": {
                 "description": "Deletes a tag from the database",
                 "consumes": [
@@ -946,6 +1508,53 @@
                         }
                     }
                 }
+            },
+            "patch": {
+                "description": "Updates an existing tag with new data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tags"
+                ],
+                "summary": "Update a tag",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Tag ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Tag update data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.UpdateTagInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns the updated tag",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Returns an error if the input is invalid or the tag does not exist",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
             }
         },
         "/users": {
@@ -971,6 +1580,133 @@
                     },
                     "500": {
                         "description": "Returns an error if the request fails",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/users/firebase_token": {
+            "patch": {
+                "description": "Updates an existing user with new data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Update a user",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "User update data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.UpdateUserFirebaseTokenInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns the updated user",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Returns an error if the input is invalid or the user does not exist",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/users/me": {
+            "get": {
+                "description": "Retrieves the user from the token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get user from token",
+                "responses": {
+                    "200": {
+                        "description": "Returns the user from the token",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Returns an error if the user cannot be retrieved",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Updates an existing user with new data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Update a user",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "User update data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.UpdateUserInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns the updated user",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Returns an error if the input is invalid or the user does not exist",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -1018,53 +1754,6 @@
                     }
                 }
             },
-            "put": {
-                "description": "Updates an existing user with new data",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Users"
-                ],
-                "summary": "Update a user",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "User ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "User update data",
-                        "name": "input",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/services.UpdateUserInput"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Returns the updated user",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Returns an error if the input is invalid or the user does not exist",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            },
             "delete": {
                 "description": "Deletes a user from the database",
                 "consumes": [
@@ -1102,11 +1791,58 @@
                         }
                     }
                 }
+            },
+            "patch": {
+                "description": "Updates an existing user with new data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Update a user",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "User update data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.UpdateUserInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns the updated user",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Returns an error if the input is invalid or the user does not exist",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
             }
         }
     },
     "definitions": {
-        "controllers.LoginInput": {
+        "auth.LoginInput": {
             "type": "object",
             "required": [
                 "email",
@@ -1121,7 +1857,56 @@
                 }
             }
         },
-        "services.CreateCategoryInput": {
+        "models.EventState": {
+            "type": "string",
+            "enum": [
+                "active",
+                "archived"
+            ],
+            "x-enum-varnames": [
+                "EventStateActive",
+                "EventStateArchived"
+            ]
+        },
+        "types.CreateAchievementInput": {
+            "type": "object",
+            "required": [
+                "condition",
+                "description",
+                "name",
+                "points"
+            ],
+            "properties": {
+                "condition": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "points": {
+                    "type": "integer"
+                }
+            }
+        },
+        "types.CreateAvatarInput": {
+            "type": "object",
+            "required": [
+                "name",
+                "url"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.CreateCategoryInput": {
             "type": "object",
             "required": [
                 "name"
@@ -1132,7 +1917,7 @@
                 }
             }
         },
-        "services.CreateEventInput": {
+        "types.CreateEventInput": {
             "type": "object",
             "required": [
                 "description",
@@ -1156,13 +1941,15 @@
                 }
             }
         },
-        "services.CreateExpenseInput": {
+        "types.CreateExpenseInput": {
             "type": "object",
             "required": [
                 "amount",
                 "description",
                 "event",
-                "name"
+                "name",
+                "participants",
+                "payers"
             ],
             "properties": {
                 "amount": {
@@ -1180,12 +1967,24 @@
                 "name": {
                     "type": "string"
                 },
+                "participants": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.ParticipantInput"
+                    }
+                },
+                "payers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.PayerInput"
+                    }
+                },
                 "tag": {
                     "type": "integer"
                 }
             }
         },
-        "services.CreateTagInput": {
+        "types.CreateTagInput": {
             "type": "object",
             "required": [
                 "name"
@@ -1196,30 +1995,87 @@
                 }
             }
         },
-        "services.CreateUserInput": {
+        "types.CreateUserInput": {
             "type": "object",
             "required": [
                 "email",
-                "firstName",
-                "lastName",
-                "password"
+                "password",
+                "username"
             ],
             "properties": {
                 "email": {
                     "type": "string"
                 },
-                "firstName": {
-                    "type": "string"
-                },
-                "lastName": {
-                    "type": "string"
-                },
                 "password": {
+                    "type": "string"
+                },
+                "username": {
                     "type": "string"
                 }
             }
         },
-        "services.UpdateCategoryInput": {
+        "types.JoinEventInput": {
+            "type": "object",
+            "required": [
+                "code"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.ParticipantInput": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "types.PayerInput": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "types.UpdateAchievementInput": {
+            "type": "object",
+            "properties": {
+                "condition": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "points": {
+                    "type": "integer"
+                }
+            }
+        },
+        "types.UpdateAvatarInput": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.UpdateCategoryInput": {
             "type": "object",
             "properties": {
                 "name": {
@@ -1227,7 +2083,7 @@
                 }
             }
         },
-        "services.UpdateEventInput": {
+        "types.UpdateEventInput": {
             "type": "object",
             "properties": {
                 "category": {
@@ -1244,15 +2100,28 @@
                 },
                 "name": {
                     "type": "string"
+                },
+                "users": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 }
             }
         },
-        "services.UpdateExpenseInput": {
+        "types.UpdateEventStateInput": {
             "type": "object",
             "required": [
-                "amount",
-                "name"
+                "state"
             ],
+            "properties": {
+                "state": {
+                    "$ref": "#/definitions/models.EventState"
+                }
+            }
+        },
+        "types.UpdateExpenseInput": {
+            "type": "object",
             "properties": {
                 "amount": {
                     "type": "number"
@@ -1263,15 +2132,30 @@
                 "description": {
                     "type": "string"
                 },
+                "id": {
+                    "type": "integer"
+                },
                 "image": {
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "participants": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.ParticipantInput"
+                    }
+                },
+                "payers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.PayerInput"
+                    }
                 }
             }
         },
-        "services.UpdateTagInput": {
+        "types.UpdateTagInput": {
             "type": "object",
             "properties": {
                 "title": {
@@ -1279,16 +2163,37 @@
                 }
             }
         },
-        "services.UpdateUserInput": {
+        "types.UpdateUserFirebaseTokenInput": {
             "type": "object",
+            "required": [
+                "firebaseToken"
+            ],
             "properties": {
-                "firstName": {
-                    "type": "string"
-                },
-                "lastName": {
+                "firebaseToken": {
                     "type": "string"
                 }
             }
+        },
+        "types.UpdateUserInput": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "integer"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "Bearer": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }
