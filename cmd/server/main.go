@@ -87,6 +87,7 @@ func main() {
 	api2.ExpenseHandler(db, api)
 	api2.AchievementHandler(db, api)
 	api2.AvatarHandler(db, api)
+	api2.RefundHandler(db, api)
 
 	srv := &http.Server{
 		Addr:    ":8080",
