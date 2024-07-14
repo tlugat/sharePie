@@ -26,6 +26,12 @@ func (r *Repository) FindOne(id uint) (models.Refund, error) {
 	return refund, result.Error
 }
 
+func (r *Repository) FindByEventId(eventId uint) ([]models.Refund, error) {
+	var refunds []models.Refund
+	result := r.db.Preload("From.Avatar").Preload("To.Avatar").Preload("Author.Avatar").Where("event_id = ?", eventId).Find(&refunds)
+	return refunds, result.Error
+}
+
 func (r *Repository) Create(refund models.Refund) (models.Refund, error) {
 	result := r.db.Create(&refund)
 	return refund, result.Error

@@ -71,6 +71,12 @@ func (c *Client) handleMessage(message Message) {
 		c.handleUpdateExpense(message.Payload)
 	case "deleteExpense":
 		c.handleDeleteExpense(message.Payload)
+	case "createRefund":
+		c.handleCreateRefund(message.Payload)
+	case "updateRefund":
+		c.handleUpdateRefund(message.Payload)
+	case "deleteRefund":
+		c.handleDeleteRefund(message.Payload)
 	default:
 		log.Println("unknown event type:", message.Type)
 	}
@@ -207,6 +213,87 @@ func (c *Client) handleDeleteExpense(payload json.RawMessage) {
 	err := c.hub.expenseService.Delete(input.ID)
 	if err != nil {
 		fmt.Println("Failed to delete expense:", err)
+		return
+	}
+
+	c.refreshExpenses()
+}
+
+func (c *Client) handleCreateRefund(payload json.RawMessage) {
+	var input types.CreateRefundInput
+	if err := json.Unmarshal(payload, &input); err != nil {
+		fmt.Println("Failed to unmarshal data:", err)
+		return
+	}
+
+	eventId, err := strconv.ParseUint(c.room, 10, 32)
+	if err != nil {
+		fmt.Println("Invalid eventId:", err)
+		return
+	}
+
+	refund, err := c.hub.refundService.Create(input, c.user, uint(eventId))
+	if err != nil {
+		fmt.Println("Failed to create expense:", err)
+		return
+	}
+
+	event, err := c.hub.eventService.FindOne(refund.EventID)
+	if err != nil {
+		fmt.Println("Failed to get event:", err)
+		return
+	}
+
+	eventUsers, err := c.hub.eventService.GetUsers(refund.EventID)
+	if err != nil {
+		fmt.Println("Failed to get event users:", err)
+		return
+	}
+
+	usersTokens := make([]*string, 0)
+	for _, user := range eventUsers {
+		if user.ID != c.user.ID {
+			usersTokens = append(usersTokens, user.FirebaseToken)
+		}
+	}
+
+	notification := messaging.Notification{
+		Title: fmt.Sprintf("New refund added to %s", event.Name),
+		Body:  fmt.Sprintf("%s add a refund of %.2f", c.user.Username, refund.Amount),
+	}
+
+	_ = firebase.SendNotification(usersTokens, notification)
+
+	c.refreshExpenses()
+}
+
+func (c *Client) handleUpdateRefund(payload json.RawMessage) {
+	var input types.UpdateRefundInput
+	if err := json.Unmarshal(payload, &input); err != nil {
+		fmt.Println("Failed to unmarshal data:", err)
+		return
+	}
+
+	_, err := c.hub.refundService.Update(input.ID, input)
+	if err != nil {
+		fmt.Println("Failed to update refund:", err)
+		return
+	}
+
+	c.refreshExpenses()
+
+}
+
+func (c *Client) handleDeleteRefund(payload json.RawMessage) {
+	var input DeleteRefundInput
+	if err := json.Unmarshal(payload, &input); err != nil {
+		fmt.Println("Failed to unmarshal data:", err)
+		return
+	}
+
+	err := c.hub.refundService.Delete(input.ID)
+	if err != nil {
+		fmt.Println("Failed to delete refund:", err)
 		return
 	}
 
