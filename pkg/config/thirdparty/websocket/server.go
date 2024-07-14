@@ -19,7 +19,7 @@ var upgrader = websocket.Upgrader{
 }
 
 func ServeWs(hub *Hub, c *gin.Context) {
-	room := c.Param("eventId")
+	room := c.Param("id")
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		return

@@ -3,7 +3,7 @@ package user
 import (
 	"sharePie-api/internal/models"
 	"sharePie-api/internal/types"
-	"sharePie-api/pkg/constants"
+	"sharePie-api/pkg/utils"
 )
 
 type Service struct {
@@ -37,7 +37,7 @@ func (service *Service) Create(input types.CreateUserInput) (models.User, error)
 		Username: input.Username,
 		Email:    input.Email,
 		Password: input.Password,
-		Role:     constants.UserRole,
+		Role:     utils.UserRole,
 		AvatarID: defaultAvatar.ID,
 		Avatar:   defaultAvatar,
 	}

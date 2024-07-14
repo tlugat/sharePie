@@ -1,8 +1,6 @@
 package api
 
 import (
-	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"sharePie-api/internal/achievement"
 	"sharePie-api/internal/auth"
 	"sharePie-api/internal/auth/middleware"
@@ -15,7 +13,10 @@ import (
 	"sharePie-api/internal/refund"
 	"sharePie-api/internal/tag"
 	"sharePie-api/internal/user"
-	"sharePie-api/pkg/constants"
+	"sharePie-api/pkg/utils"
+
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 func CategoryHandler(db *gorm.DB, route *gin.RouterGroup) {
@@ -24,10 +25,10 @@ func CategoryHandler(db *gorm.DB, route *gin.RouterGroup) {
 	categoryController := category.NewController(categoryService)
 
 	route.GET("/categories", middleware.IsAuthenticated(db), categoryController.FindCategories)
-	route.POST("/categories", middleware.IsAuthenticated(db), middleware.IsGranted(constants.AdminRole), categoryController.CreateCategory)
+	route.POST("/categories", middleware.IsAuthenticated(db), middleware.IsGranted(utils.AdminRole), categoryController.CreateCategory)
 	route.GET("/categories/:id", middleware.IsAuthenticated(db), categoryController.FindCategory)
-	route.PATCH("/categories/:id", middleware.IsAuthenticated(db), middleware.IsGranted(constants.AdminRole), categoryController.UpdateCategory)
-	route.DELETE("/categories/:id", middleware.IsAuthenticated(db), middleware.IsGranted(constants.AdminRole), categoryController.DeleteCategory)
+	route.PATCH("/categories/:id", middleware.IsAuthenticated(db), middleware.IsGranted(utils.AdminRole), categoryController.UpdateCategory)
+	route.DELETE("/categories/:id", middleware.IsAuthenticated(db), middleware.IsGranted(utils.AdminRole), categoryController.DeleteCategory)
 }
 
 func TagHandler(db *gorm.DB, route *gin.RouterGroup) {
@@ -36,10 +37,10 @@ func TagHandler(db *gorm.DB, route *gin.RouterGroup) {
 	tagController := tag.NewController(tagService)
 
 	route.GET("/tags", middleware.IsAuthenticated(db), tagController.FindTags)
-	route.POST("/tags", middleware.IsAuthenticated(db), middleware.IsGranted(constants.AdminRole), tagController.CreateTag)
+	route.POST("/tags", middleware.IsAuthenticated(db), middleware.IsGranted(utils.AdminRole), tagController.CreateTag)
 	route.GET("/tags/:id", middleware.IsAuthenticated(db), tagController.FindTag)
-	route.PATCH("/tags/:id", middleware.IsAuthenticated(db), middleware.IsGranted(constants.AdminRole), tagController.UpdateTag)
-	route.DELETE("/tags/:id", middleware.IsAuthenticated(db), middleware.IsGranted(constants.AdminRole), tagController.DeleteTag)
+	route.PATCH("/tags/:id", middleware.IsAuthenticated(db), middleware.IsGranted(utils.AdminRole), tagController.UpdateTag)
+	route.DELETE("/tags/:id", middleware.IsAuthenticated(db), middleware.IsGranted(utils.AdminRole), tagController.DeleteTag)
 }
 
 func UserHandler(db *gorm.DB, route *gin.RouterGroup) {
@@ -48,13 +49,13 @@ func UserHandler(db *gorm.DB, route *gin.RouterGroup) {
 	userService := user.NewService(userRepository, avatarRepository)
 	userController := user.NewController(userService)
 
-	route.POST("/users", middleware.IsAuthenticated(db), middleware.IsGranted(constants.AdminRole), userController.CreateUser)
-	route.GET("/users", middleware.IsAuthenticated(db), middleware.IsGranted(constants.AdminRole), userController.FindUsers)
+	route.POST("/users", middleware.IsAuthenticated(db), middleware.IsGranted(utils.AdminRole), userController.CreateUser)
+	route.GET("/users", middleware.IsAuthenticated(db), middleware.IsGranted(utils.AdminRole), userController.FindUsers)
 	route.GET("/users/:id", middleware.IsAuthenticated(db), userController.FindUser)
 	route.PATCH("/users/me", middleware.IsAuthenticated(db), userController.UpdateCurrentUser)
 	route.PATCH("/users/firebase_token", middleware.IsAuthenticated(db), userController.UpdateCurrentUserFirebaseToken)
-	route.PATCH("/users/:id", middleware.IsAuthenticated(db), middleware.IsGranted(constants.AdminRole), userController.UpdateUser)
-	route.DELETE("/users/:id", middleware.IsAuthenticated(db), middleware.IsGranted(constants.AdminRole), userController.DeleteUser)
+	route.PATCH("/users/:id", middleware.IsAuthenticated(db), middleware.IsGranted(utils.AdminRole), userController.UpdateUser)
+	route.DELETE("/users/:id", middleware.IsAuthenticated(db), middleware.IsGranted(utils.AdminRole), userController.DeleteUser)
 	route.GET("/users/me", middleware.IsAuthenticated(db), userController.GetUserFromToken)
 }
 
@@ -80,9 +81,9 @@ func EventHandler(db *gorm.DB, route *gin.RouterGroup) {
 
 	route.GET("/events", middleware.IsAuthenticated(db), eventController.FindEvents)
 	route.POST("/events", middleware.IsAuthenticated(db), eventController.CreateEvent)
-	route.GET("/events/:id", middleware.IsAuthenticated(db), eventController.FindEvent)
-	route.PATCH("/events/:id", middleware.IsAuthenticated(db), middleware.IsEventActive(db), eventController.UpdateEvent)
-	route.PATCH("/events/:id/state", middleware.IsAuthenticated(db), eventController.UpdateEventState)
+	route.GET("/events/:id", middleware.IsAuthenticated(db), middleware.IsPartOfEvent_event(db), eventController.FindEvent)
+	route.PATCH("/events/:id", middleware.IsAuthenticated(db), middleware.IsEventActive(db), middleware.IsEventAuthor(db), eventController.UpdateEvent)
+	route.PATCH("/events/:id/state", middleware.IsAuthenticated(db), middleware.IsEventAuthor(db), eventController.UpdateEventState)
 	route.DELETE("/events/:id", middleware.IsAuthenticated(db), eventController.DeleteEvent)
 	route.GET("/events/:id/balances", middleware.IsAuthenticated(db), eventController.GetEventBalances)
 	route.GET("/events/:id/transactions", middleware.IsAuthenticated(db), eventController.GetEventTransactions)
@@ -110,11 +111,11 @@ func ExpenseHandler(db *gorm.DB, route *gin.RouterGroup) {
 	)
 	expenseController := expense.NewController(expenseService)
 
-	route.GET("/expenses", middleware.IsAuthenticated(db), expenseController.FindExpenses)
+	route.GET("/expenses", middleware.IsAuthenticated(db), middleware.IsPartOfEvent_expense(db), expenseController.FindExpenses)
 	route.POST("/expenses", middleware.IsAuthenticated(db), expenseController.CreateExpense)
-	route.GET("/expenses/:id", middleware.IsAuthenticated(db), expenseController.FindExpense)
-	route.PATCH("/expenses/:id", middleware.IsAuthenticated(db), expenseController.UpdateExpense)
-	route.DELETE("/expenses/:id", middleware.IsAuthenticated(db), expenseController.DeleteExpense)
+	route.GET("/expenses/:id", middleware.IsAuthenticated(db), middleware.IsPartOfEvent_expense(db), expenseController.FindExpense)
+	route.PATCH("/expenses/:id", middleware.IsAuthenticated(db), middleware.IsPartOfEvent_expense(db), expenseController.UpdateExpense)
+	route.DELETE("/expenses/:id", middleware.IsAuthenticated(db), middleware.IsPartOfEvent_expense(db), expenseController.DeleteExpense)
 }
 
 func AchievementHandler(db *gorm.DB, route *gin.RouterGroup) {
@@ -135,10 +136,10 @@ func AvatarHandler(db *gorm.DB, route *gin.RouterGroup) {
 	avatarController := avatar.NewController(avatarService)
 
 	route.GET("/avatars", middleware.IsAuthenticated(db), avatarController.FindAvatars)
-	route.POST("/avatars", middleware.IsAuthenticated(db), middleware.IsGranted(constants.AdminRole), avatarController.CreateAvatar)
+	route.POST("/avatars", middleware.IsAuthenticated(db), middleware.IsGranted(utils.AdminRole), avatarController.CreateAvatar)
 	route.GET("/avatars/:id", middleware.IsAuthenticated(db), avatarController.FindAvatar)
-	route.PATCH("/avatars/:id", middleware.IsAuthenticated(db), middleware.IsGranted(constants.AdminRole), avatarController.UpdateAvatar)
-	route.DELETE("/avatars/:id", middleware.IsAuthenticated(db), middleware.IsGranted(constants.AdminRole), avatarController.DeleteAvatar)
+	route.PATCH("/avatars/:id", middleware.IsAuthenticated(db), middleware.IsGranted(utils.AdminRole), avatarController.UpdateAvatar)
+	route.DELETE("/avatars/:id", middleware.IsAuthenticated(db), middleware.IsGranted(utils.AdminRole), avatarController.DeleteAvatar)
 }
 
 func RefundHandler(db *gorm.DB, route *gin.RouterGroup) {
@@ -150,6 +151,6 @@ func RefundHandler(db *gorm.DB, route *gin.RouterGroup) {
 	refundController := refund.NewController(refundService)
 
 	route.GET("/refunds", middleware.IsAuthenticated(db), refundController.FindRefunds)
-	route.GET("/refunds/:id", middleware.IsAuthenticated(db), refundController.FindRefund)
-	route.DELETE("/refunds/:id", middleware.IsAuthenticated(db), refundController.DeleteRefund)
+	route.GET("/refunds/:id", middleware.IsAuthenticated(db), middleware.IsPartOfEvent_refund(db), refundController.FindRefund)
+	route.DELETE("/refunds/:id", middleware.IsAuthenticated(db), middleware.IsPartOfEvent_refund(db), refundController.DeleteRefund)
 }

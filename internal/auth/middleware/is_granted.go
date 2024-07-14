@@ -1,13 +1,14 @@
 package middleware
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"sharePie-api/internal/auth"
-	"sharePie-api/pkg/constants"
+	"sharePie-api/pkg/utils"
+
+	"github.com/gin-gonic/gin"
 )
 
-func IsGranted(allowedRoles ...constants.Role) gin.HandlerFunc {
+func IsGranted(allowedRoles ...utils.Role) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		user, ok := auth.GetUserFromContext(c)
 		if !ok {
