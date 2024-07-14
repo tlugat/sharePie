@@ -1,11 +1,12 @@
 package expense
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"sharePie-api/internal/auth"
 	"sharePie-api/internal/types"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
 type Controller struct {

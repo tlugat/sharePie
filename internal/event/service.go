@@ -2,7 +2,6 @@ package event
 
 import (
 	"errors"
-	"firebase.google.com/go/v4/messaging"
 	"log"
 	"math/rand"
 	models2 "sharePie-api/internal/models"
@@ -11,6 +10,8 @@ import (
 	"sharePie-api/pkg/config/thirdparty/firebase"
 	"strings"
 	"time"
+
+	"firebase.google.com/go/v4/messaging"
 )
 
 type Service struct {

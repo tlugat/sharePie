@@ -2,15 +2,18 @@ package websocket
 
 import (
 	"encoding/json"
-	"firebase.google.com/go/v4/messaging"
 	"fmt"
-	"github.com/gorilla/websocket"
 	"log"
+	"sharePie-api/internal/auth/middleware"
 	"sharePie-api/internal/models"
 	"sharePie-api/internal/types"
+
 	"sharePie-api/pkg/config/thirdparty/firebase"
 	"strconv"
 	"time"
+
+	"firebase.google.com/go/v4/messaging"
+	"github.com/gorilla/websocket"
 )
 
 type Client struct {
@@ -94,6 +97,17 @@ func (c *Client) handleUpdateEvent(payload json.RawMessage) {
 		return
 	}
 
+	event, err := c.hub.eventService.FindOne(uint(eventId))
+	if err != nil {
+		fmt.Println("Failed to get event:", err)
+		return
+	}
+
+	if !middleware.IsUserEventAuthor(c.user, event) {
+		fmt.Println("User is not the author of the event")
+		return
+	}
+
 	updatedEvent, err := c.hub.eventService.Update(uint(eventId), input)
 	if err != nil {
 		fmt.Println("Failed to update event:", err)
@@ -160,6 +174,11 @@ func (c *Client) handleCreateExpense(payload json.RawMessage) {
 		return
 	}
 
+	if !middleware.IsUserPartOfEvent(c.user, event) {
+		fmt.Println("User is not part of the event")
+		return
+	}
+
 	eventUsers, err := c.hub.eventService.GetUsers(expense.EventID)
 	if err != nil {
 		fmt.Println("Failed to get event users:", err)
@@ -180,10 +199,6 @@ func (c *Client) handleCreateExpense(payload json.RawMessage) {
 
 	err = firebase.SendNotification(usersTokens, notification)
 
-	if err != nil {
-		fmt.Println("Failed to send notification:", err)
-	}
-
 	c.refreshExpenses()
 }
 
@@ -194,7 +209,24 @@ func (c *Client) handleUpdateExpense(payload json.RawMessage) {
 		return
 	}
 
-	_, err := c.hub.expenseService.Update(input.ID, input)
+	expense, err := c.hub.expenseService.FindOne(input.ID)
+	if err != nil {
+		fmt.Println("Failed to find expense:", err)
+		return
+	}
+
+	event, err := c.hub.eventService.FindOne(expense.EventID)
+	if err != nil {
+		fmt.Println("Failed to get event:", err)
+		return
+	}
+
+	if !middleware.IsUserPartOfEvent(c.user, event) {
+		fmt.Println("User is not part of the event")
+		return
+	}
+
+	_, err = c.hub.expenseService.Update(input.ID, input)
 	if err != nil {
 		fmt.Println("Failed to update expense:", err)
 		return
@@ -210,7 +242,24 @@ func (c *Client) handleDeleteExpense(payload json.RawMessage) {
 		return
 	}
 
-	err := c.hub.expenseService.Delete(input.ID)
+	expense, err := c.hub.expenseService.FindOne(input.ID)
+	if err != nil {
+		fmt.Println("Failed to find expense:", err)
+		return
+	}
+
+	event, err := c.hub.eventService.FindOne(expense.EventID)
+	if err != nil {
+		fmt.Println("Failed to get event:", err)
+		return
+	}
+
+	if !middleware.IsUserPartOfEvent(c.user, event) {
+		fmt.Println("User is not part of the event")
+		return
+	}
+
+	err = c.hub.expenseService.Delete(input.ID)
 	if err != nil {
 		fmt.Println("Failed to delete expense:", err)
 		return

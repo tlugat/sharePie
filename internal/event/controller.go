@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"sharePie-api/internal/auth"
 	"sharePie-api/internal/types"
-	"sharePie-api/pkg/constants"
+	"sharePie-api/pkg/utils"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -35,7 +35,7 @@ func (controller *Controller) FindEvents(c *gin.Context) {
 		return
 	}
 
-	if user.Role == constants.AdminRole {
+	if user.Role == utils.AdminRole {
 		events, err := controller.eventService.Find()
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

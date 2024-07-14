@@ -26,7 +26,7 @@ func WSIsAuthenticated(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 		tokenString := splitToken[1]
-		fmt.Println("tokenString", tokenString)
+
 		// Decode/validate it
 		token, _ := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			// Don't forget to validate the alg is what you expect:
