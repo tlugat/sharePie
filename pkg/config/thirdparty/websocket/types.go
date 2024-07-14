@@ -10,3 +10,7 @@ type Message struct {
 type DeleteExpenseInput struct {
 	ID uint `json:"id" binding:"required"`
 }
+
+type DeleteRefundInput struct {
+	ID uint `json:"id" binding:"required"`
+}

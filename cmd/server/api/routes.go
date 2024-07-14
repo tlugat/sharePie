@@ -74,7 +74,8 @@ func EventHandler(db *gorm.DB, route *gin.RouterGroup) {
 	categoryRepository := category.NewRepository(db)
 	userRepository := user.NewRepository(db)
 	expenseRepository := expense.NewRepository(db)
-	eventService := event.NewService(eventRepository, categoryRepository, userRepository, expenseRepository)
+	refundRepository := refund.NewRepository(db)
+	eventService := event.NewService(eventRepository, categoryRepository, userRepository, expenseRepository, refundRepository)
 	eventController := event.NewController(eventService)
 
 	route.GET("/events", middleware.IsAuthenticated(db), eventController.FindEvents)
@@ -97,13 +98,16 @@ func ExpenseHandler(db *gorm.DB, route *gin.RouterGroup) {
 	participantRepository := participant.NewRepository(db)
 	payerRepository := payer.NewRepository(db)
 	eventRepository := event.NewRepository(db)
+	refundRepository := refund.NewRepository(db)
+	eventService := event.NewService(eventRepository, nil, userRepository, nil, refundRepository)
 	expenseService := expense.NewService(
 		expenseRepository,
 		tagRepository,
 		userRepository,
 		participantRepository,
 		payerRepository,
-		eventRepository)
+		eventService,
+	)
 	expenseController := expense.NewController(expenseService)
 
 	route.GET("/expenses", middleware.IsAuthenticated(db), expenseController.FindExpenses)
@@ -141,12 +145,11 @@ func RefundHandler(db *gorm.DB, route *gin.RouterGroup) {
 	refundRepository := refund.NewRepository(db)
 	userRepository := user.NewRepository(db)
 	eventRepository := event.NewRepository(db)
-	refundService := refund.NewService(refundRepository, userRepository, eventRepository)
+	eventService := event.NewService(eventRepository, nil, userRepository, nil, refundRepository)
+	refundService := refund.NewService(refundRepository, userRepository, eventService)
 	refundController := refund.NewController(refundService)
 
 	route.GET("/refunds", middleware.IsAuthenticated(db), refundController.FindRefunds)
 	route.GET("/refunds/:id", middleware.IsAuthenticated(db), refundController.FindRefund)
-	route.POST("/refunds", middleware.IsAuthenticated(db), refundController.CreateRefund)
-	route.PATCH("/refunds/:id", middleware.IsAuthenticated(db), refundController.UpdateRefund)
 	route.DELETE("/refunds/:id", middleware.IsAuthenticated(db), refundController.DeleteRefund)
 }

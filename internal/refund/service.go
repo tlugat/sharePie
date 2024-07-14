@@ -6,20 +6,20 @@ import (
 )
 
 type Service struct {
-	Repository      types.IRefundRepository
-	UserRepository  types.IUserRepository
-	EventRepository types.IEventRepository
+	Repository     types.IRefundRepository
+	UserRepository types.IUserRepository
+	EventService   types.IEventService
 }
 
 func NewService(
 	repository types.IRefundRepository,
 	userRepository types.IUserRepository,
-	eventRepository types.IEventRepository,
+	eventService types.IEventService,
 ) types.IRefundService {
 	return &Service{
-		Repository:      repository,
-		UserRepository:  userRepository,
-		EventRepository: eventRepository,
+		Repository:     repository,
+		UserRepository: userRepository,
+		EventService:   eventService,
 	}
 }
 
@@ -42,7 +42,7 @@ func (service *Service) FindOne(id uint) (models.Refund, error) {
 	return refund, nil
 }
 
-func (service *Service) Create(input types.CreateRefundInput, user models.User) (models.Refund, error) {
+func (service *Service) Create(input types.CreateRefundInput, user models.User, eventId uint) (models.Refund, error) {
 	fromUser, err := service.UserRepository.FindOneById(input.FromUserID)
 	if err != nil {
 		return models.Refund{}, err
@@ -53,25 +53,39 @@ func (service *Service) Create(input types.CreateRefundInput, user models.User) 
 		return models.Refund{}, err
 	}
 
-	event, err := service.EventRepository.FindOne(input.EventID)
+	event, err := service.EventService.FindOne(eventId)
 	if err != nil {
 		return models.Refund{}, err
 	}
 
-	refund := models.Refund{
+	newRefund := models.Refund{
 		FromUserID: input.FromUserID,
 		From:       fromUser,
 		ToUserID:   input.ToUserID,
 		To:         toUser,
 		Amount:     input.Amount,
-		EventID:    input.EventID,
+		EventID:    eventId,
 		Event:      event,
 		AuthorID:   user.ID,
 		Author:     user,
 		Date:       input.Date,
 	}
 
-	return service.Repository.Create(refund)
+	refund, err := service.Repository.Create(newRefund)
+	if err != nil {
+		return models.Refund{}, err
+	}
+
+	balances, err := service.EventService.CreateBalances(event)
+	if err != nil {
+		return models.Refund{}, err
+	}
+
+	if _, err := service.EventService.CreateTransactions(event, balances); err != nil {
+		return models.Refund{}, err
+	}
+
+	return refund, nil
 }
 
 func (service *Service) Update(id uint, input types.UpdateRefundInput) (models.Refund, error) {
@@ -103,7 +117,26 @@ func (service *Service) Update(id uint, input types.UpdateRefundInput) (models.R
 		refund.Date = input.Date
 	}
 
-	return service.Repository.Update(refund)
+	event, err := service.EventService.FindOne(refund.EventID)
+	if err != nil {
+		return models.Refund{}, err
+	}
+
+	updatedRefund, err := service.Repository.Update(refund)
+	if err != nil {
+		return models.Refund{}, err
+	}
+
+	balances, err := service.EventService.CreateBalances(event)
+	if err != nil {
+		return models.Refund{}, err
+	}
+
+	if _, err := service.EventService.CreateTransactions(event, balances); err != nil {
+		return models.Refund{}, err
+	}
+
+	return updatedRefund, nil
 }
 func (service *Service) Delete(id uint) error {
 	return service.Repository.Delete(id)

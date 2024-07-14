@@ -7,6 +7,7 @@ import (
 	"sharePie-api/internal/expense"
 	"sharePie-api/internal/participant"
 	"sharePie-api/internal/payer"
+	"sharePie-api/internal/refund"
 	"sharePie-api/internal/tag"
 	"sharePie-api/internal/types"
 	"sharePie-api/internal/user"
@@ -18,6 +19,7 @@ type Hub struct {
 	unregister     chan *Client
 	eventService   types.IEventService
 	expenseService types.IExpenseService
+	refundService  types.IRefundService
 }
 
 func NewHub(db *gorm.DB) *Hub {
@@ -28,14 +30,16 @@ func NewHub(db *gorm.DB) *Hub {
 	tagRepository := tag.NewRepository(db)
 	participantRepository := participant.NewRepository(db)
 	payerRepository := payer.NewRepository(db)
-	eventService := event.NewService(eventRepository, categoryRepository, userRepository, expenseRepository)
+	refundRepository := refund.NewRepository(db)
+	eventService := event.NewService(eventRepository, categoryRepository, userRepository, expenseRepository, refundRepository)
+	refundService := refund.NewService(refundRepository, userRepository, eventService)
 	expenseService := expense.NewService(
 		expenseRepository,
 		tagRepository,
 		userRepository,
 		participantRepository,
 		payerRepository,
-		eventRepository,
+		eventService,
 	)
 
 	return &Hub{
@@ -44,6 +48,7 @@ func NewHub(db *gorm.DB) *Hub {
 		unregister:     make(chan *Client),
 		eventService:   eventService,
 		expenseService: expenseService,
+		refundService:  refundService,
 	}
 }
 
