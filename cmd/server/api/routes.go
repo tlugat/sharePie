@@ -12,6 +12,7 @@ import (
 	"sharePie-api/internal/expense"
 	"sharePie-api/internal/participant"
 	"sharePie-api/internal/payer"
+	"sharePie-api/internal/refund"
 	"sharePie-api/internal/tag"
 	"sharePie-api/internal/user"
 	"sharePie-api/pkg/constants"
@@ -134,4 +135,18 @@ func AvatarHandler(db *gorm.DB, route *gin.RouterGroup) {
 	route.GET("/avatars/:id", middleware.IsAuthenticated(db), avatarController.FindAvatar)
 	route.PATCH("/avatars/:id", middleware.IsAuthenticated(db), middleware.IsGranted(constants.AdminRole), avatarController.UpdateAvatar)
 	route.DELETE("/avatars/:id", middleware.IsAuthenticated(db), middleware.IsGranted(constants.AdminRole), avatarController.DeleteAvatar)
+}
+
+func RefundHandler(db *gorm.DB, route *gin.RouterGroup) {
+	refundRepository := refund.NewRepository(db)
+	userRepository := user.NewRepository(db)
+	eventRepository := event.NewRepository(db)
+	refundService := refund.NewService(refundRepository, userRepository, eventRepository)
+	refundController := refund.NewController(refundService)
+
+	route.GET("/refunds", middleware.IsAuthenticated(db), refundController.FindRefunds)
+	route.GET("/refunds/:id", middleware.IsAuthenticated(db), refundController.FindRefund)
+	route.POST("/refunds", middleware.IsAuthenticated(db), refundController.CreateRefund)
+	route.PATCH("/refunds/:id", middleware.IsAuthenticated(db), refundController.UpdateRefund)
+	route.DELETE("/refunds/:id", middleware.IsAuthenticated(db), refundController.DeleteRefund)
 }
