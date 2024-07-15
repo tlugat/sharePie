@@ -320,6 +320,7 @@ func (service *Service) CreateBalances(event models2.Event) ([]models2.Balance, 
 	}
 
 	eventUsers, err := service.Repository.FindUsers(event.ID)
+
 	if err != nil {
 		return nil, err
 	}
@@ -359,7 +360,6 @@ func (service *Service) CreateBalances(event models2.Event) ([]models2.Balance, 
 		}
 		balances = append(balances, balance)
 	}
-
 	err = service.Repository.DeleteBalances(event)
 	if err != nil {
 		return nil, err
@@ -373,7 +373,6 @@ func (service *Service) CreateBalances(event models2.Event) ([]models2.Balance, 
 }
 
 func (service *Service) CreateTransactions(event models2.Event, balances []models2.Balance) ([]models2.Transaction, error) {
-
 	var creditors []models2.Balance
 	var debtors []models2.Balance
 
@@ -424,6 +423,7 @@ func (service *Service) CreateTransactions(event models2.Event, balances []model
 	if err != nil {
 		return nil, err
 	}
+
 	err = service.Repository.CreateTransactions(transactions)
 	if err != nil {
 		return nil, err
