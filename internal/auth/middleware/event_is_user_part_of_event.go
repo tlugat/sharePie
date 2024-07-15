@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 	"sharePie-api/internal/auth"
 	"sharePie-api/internal/models"
@@ -39,13 +38,11 @@ func EventIsUserPartOfEvent(db *gorm.DB) gin.HandlerFunc {
 
 		var users []models.User
 		for _, user := range event.Users {
-			fmt.Printf("user of event ==> %v\n", user.ID)
 			users = append(users, user)
 		}
 
 		event.Users = users
 
-		fmt.Printf("user ==> %v\n", user.ID)
 		if !IsUserPartOfEvent(user, event) {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "User is not part of the event"})
 			return

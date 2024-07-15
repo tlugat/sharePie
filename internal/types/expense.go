@@ -45,7 +45,7 @@ type CreateExpenseInput struct {
 type UpdateExpenseInput struct {
 	Name         string             `json:"name"`
 	Description  string             `json:"description"`
-	Tag          uint               `json:"category"`
+	Tag          uint               `json:"tag"`
 	Image        string             `json:"image"`
 	Participants []ParticipantInput `json:"participants"`
 	Payers       []PayerInput       `json:"payers"`
