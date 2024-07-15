@@ -137,6 +137,11 @@ func (service *Service) Update(id uint, input types.UpdateExpenseInput) (models2
 	}
 
 	if input.Tag != 0 {
+		tag, err := service.TagRepository.FindOne(input.Tag)
+		if err != nil {
+			return models2.Expense{}, err
+		}
+		expense.Tag = tag
 		expense.TagID = input.Tag
 	}
 
