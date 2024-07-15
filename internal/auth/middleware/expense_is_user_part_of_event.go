@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"net/http"
@@ -34,6 +35,20 @@ func ExpenseIsUserPartOfEvent(db *gorm.DB) gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "Event not found"})
 			return
 		}
+
+		result := db.Preload("Users").Where("id = ?", expense.EventID).First(&event)
+		if result.Error != nil {
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "Fetching user event error"})
+			return
+		}
+
+		var users []models.User
+		for _, user := range event.Users {
+			fmt.Printf("user of event ==> %v\n", user.ID)
+			users = append(users, user)
+		}
+
+		event.Users = users
 
 		if !IsUserPartOfEvent(user, event) {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "User is not part of the event"})
