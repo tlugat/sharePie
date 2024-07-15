@@ -163,7 +163,7 @@ func (service *Service) Delete(id uint) error {
 	return service.Repository.Delete(id)
 }
 
-func (service *Service) GetUsers(eventID uint) ([]types.UserWithExpenses, error) {
+func (service *Service) GetUsersWithExpenses(eventID uint) ([]types.UserWithExpenses, error) {
 	users, err := service.UserRepository.FindByEventId(eventID)
 	if err != nil {
 		return nil, err
@@ -195,6 +195,15 @@ func (service *Service) GetUsers(eventID uint) ([]types.UserWithExpenses, error)
 	}
 
 	return usersWithExpenses, nil
+}
+
+func (service *Service) GetUsers(eventID uint) ([]models2.User, error) {
+	users, err := service.UserRepository.FindByEventId(eventID)
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
 }
 
 func (service *Service) AddUser(code string, user models2.User) (models2.Event, error) {
