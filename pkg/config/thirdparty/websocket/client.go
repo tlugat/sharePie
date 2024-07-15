@@ -103,6 +103,12 @@ func (c *Client) handleUpdateEvent(payload json.RawMessage) {
 		return
 	}
 
+	users, err := c.hub.eventService.GetUsers(uint(eventId))
+	if err != nil {
+		fmt.Println("Failed to get event users:", err)
+		return
+	}
+	
 	if !middleware.IsUserEventAuthor(c.user, event) {
 		fmt.Println("User is not the author of the event")
 		return
@@ -130,12 +136,6 @@ func (c *Client) handleUpdateEvent(payload json.RawMessage) {
 	}
 
 	c.hub.rooms[c.room].broadcast <- message
-
-	users, err := c.hub.eventService.GetUsers(uint(eventId))
-	if err != nil {
-		fmt.Println("Failed to get event users:", err)
-		return
-	}
 
 	usersJSON, err := json.Marshal(users)
 	if err != nil {
@@ -179,21 +179,8 @@ func (c *Client) handleCreateExpense(payload json.RawMessage) {
 		fmt.Println("Failed to get user users:", err)
 	}
 
-	event.Users = users
-
-	if !middleware.IsUserPartOfEvent(c.user, event) {
-		fmt.Println("User is not part of the event")
-		return
-	}
-
-	eventUsers, err := c.hub.eventService.GetUsers(expense.EventID)
-	if err != nil {
-		fmt.Println("Failed to get event users:", err)
-		return
-	}
-
 	usersTokens := make([]*string, 0)
-	for _, user := range eventUsers {
+	for _, user := range users {
 		if user.ID != c.user.ID {
 			usersTokens = append(usersTokens, user.FirebaseToken)
 		}
@@ -216,24 +203,7 @@ func (c *Client) handleUpdateExpense(payload json.RawMessage) {
 		return
 	}
 
-	expense, err := c.hub.expenseService.FindOne(input.ID)
-	if err != nil {
-		fmt.Println("Failed to find expense:", err)
-		return
-	}
-
-	event, err := c.hub.eventService.FindOne(expense.EventID)
-	if err != nil {
-		fmt.Println("Failed to get event:", err)
-		return
-	}
-
-	if !middleware.IsUserPartOfEvent(c.user, event) {
-		fmt.Println("User is not part of the event")
-		return
-	}
-
-	_, err = c.hub.expenseService.Update(input.ID, input)
+	_, err := c.hub.expenseService.Update(input.ID, input)
 	if err != nil {
 		fmt.Println("Failed to update expense:", err)
 		return
@@ -249,24 +219,7 @@ func (c *Client) handleDeleteExpense(payload json.RawMessage) {
 		return
 	}
 
-	expense, err := c.hub.expenseService.FindOne(input.ID)
-	if err != nil {
-		fmt.Println("Failed to find expense:", err)
-		return
-	}
-
-	event, err := c.hub.eventService.FindOne(expense.EventID)
-	if err != nil {
-		fmt.Println("Failed to get event:", err)
-		return
-	}
-
-	if !middleware.IsUserPartOfEvent(c.user, event) {
-		fmt.Println("User is not part of the event")
-		return
-	}
-
-	err = c.hub.expenseService.Delete(input.ID)
+	err := c.hub.expenseService.Delete(input.ID)
 	if err != nil {
 		fmt.Println("Failed to delete expense:", err)
 		return
