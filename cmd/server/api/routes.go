@@ -81,7 +81,7 @@ func EventHandler(db *gorm.DB, route *gin.RouterGroup) {
 
 	route.GET("/events", middleware.IsAuthenticated(db), eventController.FindEvents)
 	route.POST("/events", middleware.IsAuthenticated(db), eventController.CreateEvent)
-	route.GET("/events/:id", middleware.IsAuthenticated(db), middleware.IsPartOfEvent_event(db), eventController.FindEvent)
+	route.GET("/events/:id", middleware.IsAuthenticated(db), middleware.EventIsUserPartOfEvent(db), eventController.FindEvent)
 	route.PATCH("/events/:id", middleware.IsAuthenticated(db), middleware.IsEventActive(db), middleware.IsEventAuthor(db), eventController.UpdateEvent)
 	route.PATCH("/events/:id/state", middleware.IsAuthenticated(db), middleware.IsEventAuthor(db), eventController.UpdateEventState)
 	route.DELETE("/events/:id", middleware.IsAuthenticated(db), eventController.DeleteEvent)
@@ -111,11 +111,11 @@ func ExpenseHandler(db *gorm.DB, route *gin.RouterGroup) {
 	)
 	expenseController := expense.NewController(expenseService)
 
-	route.GET("/expenses", middleware.IsAuthenticated(db), middleware.IsPartOfEvent_expense(db), expenseController.FindExpenses)
+	route.GET("/expenses", middleware.IsAuthenticated(db), middleware.ExpenseIsUserPartOfEvent(db), expenseController.FindExpenses)
 	route.POST("/expenses", middleware.IsAuthenticated(db), expenseController.CreateExpense)
-	route.GET("/expenses/:id", middleware.IsAuthenticated(db), middleware.IsPartOfEvent_expense(db), expenseController.FindExpense)
-	route.PATCH("/expenses/:id", middleware.IsAuthenticated(db), middleware.IsPartOfEvent_expense(db), expenseController.UpdateExpense)
-	route.DELETE("/expenses/:id", middleware.IsAuthenticated(db), middleware.IsPartOfEvent_expense(db), expenseController.DeleteExpense)
+	route.GET("/expenses/:id", middleware.IsAuthenticated(db), middleware.ExpenseIsUserPartOfEvent(db), expenseController.FindExpense)
+	route.PATCH("/expenses/:id", middleware.IsAuthenticated(db), middleware.ExpenseIsUserPartOfEvent(db), expenseController.UpdateExpense)
+	route.DELETE("/expenses/:id", middleware.IsAuthenticated(db), middleware.ExpenseIsUserPartOfEvent(db), expenseController.DeleteExpense)
 }
 
 func AchievementHandler(db *gorm.DB, route *gin.RouterGroup) {
@@ -151,6 +151,6 @@ func RefundHandler(db *gorm.DB, route *gin.RouterGroup) {
 	refundController := refund.NewController(refundService)
 
 	route.GET("/refunds", middleware.IsAuthenticated(db), refundController.FindRefunds)
-	route.GET("/refunds/:id", middleware.IsAuthenticated(db), middleware.IsPartOfEvent_refund(db), refundController.FindRefund)
-	route.DELETE("/refunds/:id", middleware.IsAuthenticated(db), middleware.IsPartOfEvent_refund(db), refundController.DeleteRefund)
+	route.GET("/refunds/:id", middleware.IsAuthenticated(db), middleware.RefundIsUserPartOfEvent(db), refundController.FindRefund)
+	route.DELETE("/refunds/:id", middleware.IsAuthenticated(db), middleware.RefundIsUserPartOfEvent(db), refundController.DeleteRefund)
 }

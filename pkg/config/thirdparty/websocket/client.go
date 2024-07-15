@@ -174,6 +174,13 @@ func (c *Client) handleCreateExpense(payload json.RawMessage) {
 		return
 	}
 
+	users, err := c.hub.eventService.GetUsers(expense.EventID)
+	if err != nil {
+		fmt.Println("Failed to get user users:", err)
+	}
+
+	event.Users = users
+
 	if !middleware.IsUserPartOfEvent(c.user, event) {
 		fmt.Println("User is not part of the event")
 		return
@@ -440,7 +447,7 @@ func (c *Client) refreshTransactions(event models.Event) {
 }
 
 func (c *Client) refreshUsers(event models.Event) {
-	users, err := c.hub.eventService.GetUsers(event.ID)
+	users, err := c.hub.eventService.GetUsersWithExpenses(event.ID)
 	if err != nil {
 		fmt.Println("Failed to get users:", err)
 		return

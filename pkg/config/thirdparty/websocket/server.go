@@ -69,7 +69,7 @@ func initRoomMessages(client *Client) {
 		}
 
 		// Fetch and send users
-		users, err := client.hub.eventService.GetUsers(uint(eventId))
+		users, err := client.hub.eventService.GetUsersWithExpenses(uint(eventId))
 		if err == nil {
 			usersJSON, err := json.Marshal(users)
 			if err == nil {

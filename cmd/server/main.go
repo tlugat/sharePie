@@ -74,7 +74,7 @@ func main() {
 	hub := websocket2.NewHub(db)
 	go hub.Run()
 
-	api.GET("/ws/events/:id", middleware.WSIsAuthenticated(db), middleware.IsPartOfEvent_event(db), func(c *gin.Context) {
+	api.GET("/ws/events/:id", middleware.WSIsAuthenticated(db), middleware.EventIsUserPartOfEvent(db), func(c *gin.Context) {
 		websocket2.ServeWs(hub, c)
 	})
 
