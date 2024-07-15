@@ -1,6 +1,8 @@
 package category
 
 import (
+	"errors"
+	"fmt"
 	"sharePie-api/internal/models"
 	"sharePie-api/internal/types"
 )
@@ -14,32 +16,51 @@ func NewService(repository types.ICategoryRepository) types.ICategoryService {
 }
 
 func (service *Service) Find() ([]models.Category, error) {
-	return service.Repository.Find()
+	categories, err := service.Repository.Find()
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("failed to find categories: %v", err))
+	}
+	return categories, nil
 }
 
 func (service *Service) FindOne(id uint) (models.Category, error) {
-	return service.Repository.FindOne(id)
+	category, err := service.Repository.FindOne(id)
+	if err != nil {
+		return models.Category{}, errors.New(fmt.Sprintf("failed to find category with id %d: %v", id, err))
+	}
+	return category, nil
 }
 
 func (service *Service) Create(input types.CreateCategoryInput) (models.Category, error) {
 	category := models.Category{Name: input.Name}
-	return service.Repository.Create(category)
+	newCategory, err := service.Repository.Create(category)
+	if err != nil {
+		return models.Category{}, errors.New(fmt.Sprintf("failed to create category: %v", err))
+	}
+	return newCategory, nil
 }
 
 func (service *Service) Update(id uint, input types.UpdateCategoryInput) (models.Category, error) {
 	category, err := service.Repository.FindOne(id)
-
 	if err != nil {
-		return models.Category{}, err
+		return models.Category{}, errors.New(fmt.Sprintf("failed to find category with id %d: %v", id, err))
 	}
 
 	if input.Name != "" {
 		category.Name = input.Name
 	}
 
-	return service.Repository.Update(category)
+	updatedCategory, err := service.Repository.Update(category)
+	if err != nil {
+		return models.Category{}, errors.New(fmt.Sprintf("failed to update category with id %d: %v", id, err))
+	}
+	return updatedCategory, nil
 }
 
 func (service *Service) Delete(id uint) error {
-	return service.Repository.Delete(id)
+	err := service.Repository.Delete(id)
+	if err != nil {
+		return errors.New(fmt.Sprintf("failed to delete category with id %d: %v", id, err))
+	}
+	return nil
 }

@@ -2,6 +2,7 @@ package event
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"math/rand"
 	models2 "sharePie-api/internal/models"
@@ -98,9 +99,8 @@ func (service *Service) Create(input types.CreateEventInput, user models2.User) 
 
 func (service *Service) Update(id uint, input types.UpdateEventInput) (models2.Event, error) {
 	event, err := service.Repository.FindOne(id)
-
 	if err != nil {
-		return models2.Event{}, err
+		return models2.Event{}, errors.New(fmt.Sprintf("event not found with id %d", id))
 	}
 
 	if input.Name != "" {
@@ -112,7 +112,7 @@ func (service *Service) Update(id uint, input types.UpdateEventInput) (models2.E
 	if input.Category != 0 {
 		category, err := service.CategoryRepository.FindOne(input.Category)
 		if err != nil {
-			return models2.Event{}, err
+			return models2.Event{}, errors.New(fmt.Sprintf("category not found with id %d", input.Category))
 		}
 		event.Category = category
 		event.CategoryID = input.Category
@@ -120,7 +120,7 @@ func (service *Service) Update(id uint, input types.UpdateEventInput) (models2.E
 	if input.Image != "" {
 		image, err := cloudinary.UploadImage(input.Image, "Events")
 		if err != nil {
-			return models2.Event{}, err
+			return models2.Event{}, errors.New("failed to upload image")
 		}
 		event.Image = image
 	}
@@ -131,42 +131,55 @@ func (service *Service) Update(id uint, input types.UpdateEventInput) (models2.E
 	if input.Users != nil {
 		users, err := service.UserRepository.FindByIds(input.Users)
 		if err != nil {
-			return models2.Event{}, err
+			return models2.Event{}, errors.New("failed to find users by ids")
 		}
 		err = service.Repository.RemoveUsers(event)
 		if err != nil {
-			return models2.Event{}, err
+			return models2.Event{}, errors.New("failed to remove users from event")
 		}
 		event.Users = users
-
 	}
 
-	return service.Repository.Update(event)
+	updatedEvent, err := service.Repository.Update(event)
+	if err != nil {
+		return models2.Event{}, errors.New(fmt.Sprintf("failed to update event with id %d", id))
+	}
+
+	return updatedEvent, nil
 }
 
 func (service *Service) UpdateState(id uint, input types.UpdateEventStateInput) (models2.Event, error) {
 	event, err := service.Repository.FindOne(id)
 	if err != nil {
-		return models2.Event{}, err
+		return models2.Event{}, errors.New(fmt.Sprintf("event not found with id %d", id))
 	}
 
 	if err := input.State.IsValid(); err != nil {
-		return models2.Event{}, err
+		return models2.Event{}, errors.New("invalid state")
 	}
 
 	event.State = input.State
 
-	return service.Repository.Update(event)
+	updatedEvent, err := service.Repository.Update(event)
+	if err != nil {
+		return models2.Event{}, errors.New(fmt.Sprintf("failed to update event state with id %d", id))
+	}
+
+	return updatedEvent, nil
 }
 
 func (service *Service) Delete(id uint) error {
-	return service.Repository.Delete(id)
+	err := service.Repository.Delete(id)
+	if err != nil {
+		return errors.New(fmt.Sprintf("failed to delete event with id %d: %v", id, err))
+	}
+	return nil
 }
 
 func (service *Service) GetUsersWithExpenses(eventID uint) ([]types.UserWithExpenses, error) {
 	users, err := service.UserRepository.FindByEventId(eventID)
 	if err != nil {
-		return nil, err
+		return nil, errors.New(fmt.Sprintf("failed to find users for event with id %d: %v", eventID, err))
 	}
 
 	var usersWithExpenses []types.UserWithExpenses
@@ -174,7 +187,7 @@ func (service *Service) GetUsersWithExpenses(eventID uint) ([]types.UserWithExpe
 	for _, user := range users {
 		expenses, err := service.ExpenseRepository.FindByPayerUserIdAndEventId(user.ID, eventID)
 		if err != nil {
-			return nil, err
+			return nil, errors.New(fmt.Sprintf("failed to find expenses for user with id %d and event id %d: %v", user.ID, eventID, err))
 		}
 
 		totalExpenses := 0.0
@@ -200,7 +213,7 @@ func (service *Service) GetUsersWithExpenses(eventID uint) ([]types.UserWithExpe
 func (service *Service) GetUsers(eventID uint) ([]models2.User, error) {
 	users, err := service.UserRepository.FindByEventId(eventID)
 	if err != nil {
-		return nil, err
+		return nil, errors.New(fmt.Sprintf("failed to find users for event with id %d: %v", eventID, err))
 	}
 
 	return users, nil
@@ -209,19 +222,19 @@ func (service *Service) GetUsers(eventID uint) ([]models2.User, error) {
 func (service *Service) AddUser(code string, user models2.User) (models2.Event, error) {
 	event, err := service.Repository.FindOneByCode(code)
 	if err != nil {
-		return models2.Event{}, err
+		return models2.Event{}, errors.New(fmt.Sprintf("failed to find event with code %s: %v", code, err))
 	}
 
 	if event.State != models2.EventStateActive {
-		return models2.Event{}, errors.New("Event is not active")
+		return models2.Event{}, errors.New("event is not active")
 	}
 
 	users, err := service.Repository.FindUsers(event.ID)
 	if err != nil {
-		return models2.Event{}, err
+		return models2.Event{}, errors.New(fmt.Sprintf("failed to find users for event with id %d: %v", event.ID, err))
 	}
-	isUserAlreadyInEvent := false
 
+	isUserAlreadyInEvent := false
 	for _, u := range users {
 		if u.ID == user.ID {
 			isUserAlreadyInEvent = true
@@ -230,14 +243,14 @@ func (service *Service) AddUser(code string, user models2.User) (models2.Event, 
 	}
 
 	if isUserAlreadyInEvent {
-		return models2.Event{}, types.NewConflictError("User is already in the event")
+		return models2.Event{}, types.NewConflictError("user is already in the event")
 	}
 
 	event.Users = append(users, user)
 
 	_, err = service.Repository.UpdateUsers(event)
 	if err != nil {
-		return models2.Event{}, err
+		return models2.Event{}, errors.New(fmt.Sprintf("failed to update users for event with id %d: %v", event.ID, err))
 	}
 
 	notification := messaging.Notification{
@@ -255,7 +268,7 @@ func (service *Service) AddUser(code string, user models2.User) (models2.Event, 
 	err = firebase.SendNotification(usersTokens, notification)
 	if err != nil {
 		log.Println("Failed to send notification:", err)
-		return models2.Event{}, err
+		return models2.Event{}, errors.New("failed to send notification")
 	}
 
 	return event, nil
@@ -264,7 +277,7 @@ func (service *Service) AddUser(code string, user models2.User) (models2.Event, 
 func (service *Service) GetBalances(eventId uint) ([]models2.Balance, error) {
 	balances, err := service.Repository.FindBalances(eventId)
 	if err != nil {
-		return nil, err
+		return nil, errors.New(fmt.Sprintf("failed to find balances for event with id %d: %v", event.ID, err))
 	}
 	return balances, nil
 }
@@ -272,7 +285,7 @@ func (service *Service) GetBalances(eventId uint) ([]models2.Balance, error) {
 func (service *Service) GetTransactions(eventId uint) ([]models2.Transaction, error) {
 	transactions, err := service.Repository.FindTransactions(eventId)
 	if err != nil {
-		return nil, err
+		return nil, errors.New(fmt.Sprintf("failed to find transactions for event with id %d: %v", event.ID, err))
 	}
 	return transactions, nil
 }
@@ -295,7 +308,7 @@ func generateInvitationCode(length int) string {
 func (service *Service) FindExpenses(id uint) ([]models2.Expense, error) {
 	expenses, err := service.ExpenseRepository.FindByEventId(id)
 	if err != nil {
-		return nil, err
+		return nil, errors.New(fmt.Sprintf("failed to find expenses for event with id %d: %v", id, err))
 	}
 	return expenses, nil
 }
@@ -303,13 +316,13 @@ func (service *Service) FindExpenses(id uint) ([]models2.Expense, error) {
 func (service *Service) FindByUser(id uint) ([]models2.Event, error) {
 	events, err := service.Repository.FindByUser(id)
 	if err != nil {
-		return nil, err
+		return nil, errors.New(fmt.Sprintf("failed to find events for user with id %d: %v", id, err))
 	}
 
 	for i, event := range events {
 		users, err := service.GetUsers(event.ID)
 		if err != nil {
-			return nil, err
+			return nil, errors.New(fmt.Sprintf("failed to find users for event with id %d: %v", event.ID, err))
 		}
 		userCount := len(users)
 		events[i].UserCount = userCount
@@ -321,18 +334,17 @@ func (service *Service) FindByUser(id uint) ([]models2.Event, error) {
 func (service *Service) CreateBalances(event models2.Event) ([]models2.Balance, error) {
 	expenses, err := service.ExpenseRepository.FindByEventId(event.ID)
 	if err != nil {
-		return nil, err
+		return nil, errors.New(fmt.Sprintf("failed to find expenses for event with id %d: %v", event.ID, err))
 	}
 
 	refunds, err := service.RefundRepository.FindByEventId(event.ID)
 	if err != nil {
-		return nil, err
+		return nil, errors.New(fmt.Sprintf("failed to find refunds for event with id %d: %v", event.ID, err))
 	}
 
 	eventUsers, err := service.Repository.FindUsers(event.ID)
-
 	if err != nil {
-		return nil, err
+		return nil, errors.New(fmt.Sprintf("failed to find users for event with id %d: %v", event.ID, err))
 	}
 
 	userBalances := make(map[uint]float64)
@@ -372,11 +384,11 @@ func (service *Service) CreateBalances(event models2.Event) ([]models2.Balance, 
 	}
 	err = service.Repository.DeleteBalances(event)
 	if err != nil {
-		return nil, err
+		return nil, errors.New(fmt.Sprintf("failed to delete balances for event with id %d: %v", event.ID, err))
 	}
 	err = service.Repository.CreateBalances(balances)
 	if err != nil {
-		return nil, err
+		return nil, errors.New(fmt.Sprintf("failed to create balances for event with id %d: %v", event.ID, err))
 	}
 
 	return balances, nil
@@ -431,12 +443,12 @@ func (service *Service) CreateTransactions(event models2.Event, balances []model
 
 	err := service.Repository.DeleteTransactions(event)
 	if err != nil {
-		return nil, err
+		return nil, errors.New(fmt.Sprintf("failed to delete transactions for event with id %d: %v", event.ID, err))
 	}
 
 	err = service.Repository.CreateTransactions(transactions)
 	if err != nil {
-		return nil, err
+		return nil, errors.New(fmt.Sprintf("failed to create transactions for event with id %d: %v", event.ID, err))
 	}
 
 	return transactions, nil
