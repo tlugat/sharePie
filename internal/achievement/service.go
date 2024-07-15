@@ -1,6 +1,8 @@
 package achievement
 
 import (
+	"errors"
+	"fmt"
 	"sharePie-api/internal/models"
 	"sharePie-api/internal/types"
 )
@@ -20,19 +22,16 @@ func NewService(
 func (service *Service) Find() ([]models.Achievement, error) {
 	achievements, err := service.Repository.Find()
 	if err != nil {
-		return nil, err
+		return nil, errors.New(fmt.Sprintf("failed to find achievements: %v", err))
 	}
-
 	return achievements, nil
 }
 
 func (service *Service) FindOne(id uint) (models.Achievement, error) {
 	achievement, err := service.Repository.FindOne(id)
-
 	if err != nil {
-		return models.Achievement{}, err
+		return models.Achievement{}, errors.New(fmt.Sprintf("failed to find achievement with id %d: %v", id, err))
 	}
-
 	return achievement, nil
 }
 
@@ -44,14 +43,17 @@ func (service *Service) Create(input types.CreateAchievementInput) (models.Achie
 		Condition:   input.Condition,
 	}
 
-	return service.Repository.Create(achievement)
+	newAchievement, err := service.Repository.Create(achievement)
+	if err != nil {
+		return models.Achievement{}, errors.New(fmt.Sprintf("failed to create achievement: %v", err))
+	}
+	return newAchievement, nil
 }
 
 func (service *Service) Update(id uint, input types.UpdateAchievementInput) (models.Achievement, error) {
 	achievement, err := service.Repository.FindOne(id)
-
 	if err != nil {
-		return models.Achievement{}, err
+		return models.Achievement{}, errors.New(fmt.Sprintf("failed to find achievement with id %d: %v", id, err))
 	}
 
 	if input.Name != "" {
@@ -67,9 +69,17 @@ func (service *Service) Update(id uint, input types.UpdateAchievementInput) (mod
 		achievement.Condition = input.Condition
 	}
 
-	return service.Repository.Update(achievement)
+	updatedAchievement, err := service.Repository.Update(achievement)
+	if err != nil {
+		return models.Achievement{}, errors.New(fmt.Sprintf("failed to update achievement with id %d: %v", id, err))
+	}
+	return updatedAchievement, nil
 }
 
 func (service *Service) Delete(id uint) error {
-	return service.Repository.Delete(id)
+	err := service.Repository.Delete(id)
+	if err != nil {
+		return errors.New(fmt.Sprintf("failed to delete achievement with id %d: %v", id, err))
+	}
+	return nil
 }
