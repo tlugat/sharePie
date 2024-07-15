@@ -171,7 +171,12 @@ func (service *Service) Update(id uint, input types.UpdateExpenseInput) (models2
 		expense.Payers = updatedPayers
 	}
 
-	event, err := service.EventService.FindOne(id)
+	newExpense, err := service.Repository.Update(expense)
+	if err != nil {
+		return models2.Expense{}, err
+	}
+
+	event, err := service.EventService.FindOne(expense.EventID)
 	if err != nil {
 		return models2.Expense{}, err
 	}
@@ -185,7 +190,7 @@ func (service *Service) Update(id uint, input types.UpdateExpenseInput) (models2
 		return models2.Expense{}, err
 	}
 
-	return service.Repository.Update(expense)
+	return newExpense, nil
 }
 
 func (service *Service) Delete(id uint) error {
