@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func prettyPrint(args ...interface{}) {
+func PrettyPrint(args ...interface{}) {
 	var caller string
 
 	timeNow := time.Now().Format("01-02-2006 15:04:05")
