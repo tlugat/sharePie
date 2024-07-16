@@ -216,7 +216,7 @@ func (controller *Controller) GetEventBalances(c *gin.Context) {
 		return
 	}
 
-	balanceSummary, err := controller.eventService.GetBalances(event)
+	balanceSummary, err = controller.eventService.GetBalances(event.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to retrieve balance summary for event with ID %d: %v", id, err)})
 		return
@@ -246,7 +246,7 @@ func (controller *Controller) GetEventTransactions(c *gin.Context) {
 		return
 	}
 
-	transactions, err := controller.eventService.GetTransactions(event)
+	transactions, err = controller.eventService.GetTransactions(event.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to retrieve transactions for event with ID %d: %v", id, err)})
 		return
