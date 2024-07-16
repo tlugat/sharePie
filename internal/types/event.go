@@ -16,8 +16,8 @@ type IEventRepository interface {
 	FindUsers(id uint) ([]models.User, error)
 	CreateBalances(balances []models.Balance) error
 	CreateTransactions(transactions []models.Transaction) error
-	FindBalances(event models.Event) ([]models.Balance, error)
-	FindTransactions(event models.Event) ([]models.Transaction, error)
+	FindBalances(eventId uint) ([]models.Balance, error)
+	FindTransactions(eventId uint) ([]models.Transaction, error)
 	DeleteBalances(event models.Event) error
 	DeleteTransactions(event models.Event) error
 	RemoveUsers(event models.Event) error
@@ -34,8 +34,8 @@ type IEventService interface {
 	GetUsers(id uint) ([]models.User, error)
 	GetUsersWithExpenses(id uint) ([]UserWithExpenses, error)
 	AddUser(code string, user models.User) (models.Event, error)
-	GetBalances(event models.Event) ([]models.Balance, error)
-	GetTransactions(event models.Event) ([]models.Transaction, error)
+	GetBalances(eventId uint) ([]models.Balance, error)
+	GetTransactions(eventId uint) ([]models.Transaction, error)
 	FindExpenses(id uint) ([]models.Expense, error)
 	FindByUser(id uint) ([]models.Event, error)
 	CreateBalances(event models.Event) ([]models.Balance, error)

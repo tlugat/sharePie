@@ -17,6 +17,7 @@ type IRefundRepository interface {
 type IRefundService interface {
 	Find() ([]models.Refund, error)
 	FindOne(id uint) (models.Refund, error)
+	FindByEventId(eventId uint) ([]models.Refund, error)
 	Create(input CreateRefundInput, user models.User, eventId uint) (models.Refund, error)
 	Update(id uint, input UpdateRefundInput) (models.Refund, error)
 	Delete(id uint) error

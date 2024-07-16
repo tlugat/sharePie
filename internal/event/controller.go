@@ -210,14 +210,7 @@ func (controller *Controller) GetEventUsers(c *gin.Context) {
 // @Router /events/{id}/summary [get]
 func (controller *Controller) GetEventBalances(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	event, err := controller.eventService.FindOne(uint(id))
-
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Event not found!"})
-		return
-	}
-
-	balanceSummary, err := controller.eventService.GetBalances(event)
+	balanceSummary, err := controller.eventService.GetBalances(uint(id))
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -239,14 +232,8 @@ func (controller *Controller) GetEventBalances(c *gin.Context) {
 // @Router /events/{id}/transactions [get]
 func (controller *Controller) GetEventTransactions(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	event, err := controller.eventService.FindOne(uint(id))
 
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Event not found!"})
-		return
-	}
-
-	transactions, err := controller.eventService.GetTransactions(event)
+	transactions, err := controller.eventService.GetTransactions(uint(id))
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

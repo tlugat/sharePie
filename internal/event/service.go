@@ -261,16 +261,16 @@ func (service *Service) AddUser(code string, user models2.User) (models2.Event, 
 	return event, nil
 }
 
-func (service *Service) GetBalances(event models2.Event) ([]models2.Balance, error) {
-	balances, err := service.Repository.FindBalances(event)
+func (service *Service) GetBalances(eventId uint) ([]models2.Balance, error) {
+	balances, err := service.Repository.FindBalances(eventId)
 	if err != nil {
 		return nil, err
 	}
 	return balances, nil
 }
 
-func (service *Service) GetTransactions(event models2.Event) ([]models2.Transaction, error) {
-	transactions, err := service.Repository.FindTransactions(event)
+func (service *Service) GetTransactions(eventId uint) ([]models2.Transaction, error) {
+	transactions, err := service.Repository.FindTransactions(eventId)
 	if err != nil {
 		return nil, err
 	}
