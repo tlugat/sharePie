@@ -110,7 +110,7 @@ func initRoomMessages(client *Client) {
 			fmt.Println("Failed to get event expenses:", err)
 		}
 
-		balances, err := client.hub.eventService.GetBalances(event)
+		balances, err := client.hub.eventService.GetBalances(uint(eventId))
 		if err == nil {
 			balancesJSON, err := json.Marshal(balances)
 			if err == nil {
@@ -130,7 +130,7 @@ func initRoomMessages(client *Client) {
 			fmt.Println("Failed to get event balances:", err)
 		}
 
-		transactions, err := client.hub.eventService.GetTransactions(event)
+		transactions, err := client.hub.eventService.GetTransactions(uint(eventId))
 		if err == nil {
 			transactionsJSON, err := json.Marshal(transactions)
 			if err == nil {
@@ -148,6 +148,26 @@ func initRoomMessages(client *Client) {
 			}
 		} else {
 			fmt.Println("Failed to get event transactions:", err)
+		}
+
+		refunds, err := client.hub.refundService.FindByEventId(uint(eventId))
+		if err == nil {
+			refundsJSON, err := json.Marshal(refunds)
+			if err == nil {
+				refundsMessage, err := json.Marshal(Message{
+					Type:    "refunds",
+					Payload: refundsJSON,
+				})
+				if err == nil {
+					client.hub.rooms[client.room].broadcast <- refundsMessage
+				} else {
+					fmt.Println("Failed to marshal refunds message:", err)
+				}
+			} else {
+				fmt.Println("Failed to marshal refunds:", err)
+			}
+		} else {
+			fmt.Println("Failed to get event refunds:", err)
 		}
 	}
 }

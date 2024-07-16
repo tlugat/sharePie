@@ -67,25 +67,25 @@ func (c *Client) writePump() {
 func (c *Client) handleMessage(message Message) {
 	switch message.Type {
 	case "updateEvent":
-		c.handleUpdateEvent(message.Payload)
+		c.updateEvent(message.Payload)
 	case "createExpense":
-		c.handleCreateExpense(message.Payload)
+		c.createExpense(message.Payload)
 	case "updateExpense":
-		c.handleUpdateExpense(message.Payload)
+		c.updateExpense(message.Payload)
 	case "deleteExpense":
-		c.handleDeleteExpense(message.Payload)
+		c.deleteExpense(message.Payload)
 	case "createRefund":
-		c.handleCreateRefund(message.Payload)
+		c.createRefund(message.Payload)
 	case "updateRefund":
-		c.handleUpdateRefund(message.Payload)
+		c.updateRefund(message.Payload)
 	case "deleteRefund":
-		c.handleDeleteRefund(message.Payload)
+		c.deleteRefund(message.Payload)
 	default:
 		log.Println("unknown event type:", message.Type)
 	}
 }
 
-func (c *Client) handleUpdateEvent(payload json.RawMessage) {
+func (c *Client) updateEvent(payload json.RawMessage) {
 	var input types.UpdateEventInput
 	if err := json.Unmarshal(payload, &input); err != nil {
 		fmt.Println("Failed to unmarshal data:", err)
@@ -103,59 +103,22 @@ func (c *Client) handleUpdateEvent(payload json.RawMessage) {
 		return
 	}
 
-	users, err := c.hub.eventService.GetUsers(uint(eventId))
-	if err != nil {
-		fmt.Println("Failed to get event users:", err)
-		return
-	}
-	
 	if !middleware.IsUserEventAuthor(c.user, event) {
 		fmt.Println("User is not the author of the event")
 		return
 	}
 
-	updatedEvent, err := c.hub.eventService.Update(uint(eventId), input)
+	_, err = c.hub.eventService.Update(uint(eventId), input)
 	if err != nil {
 		fmt.Println("Failed to update event:", err)
 		return
 	}
 
-	updatedEventJSON, err := json.Marshal(updatedEvent)
-	if err != nil {
-		fmt.Println("Failed to marshal updated event:", err)
-		return
-	}
-
-	message, err := json.Marshal(Message{
-		Type:    "event",
-		Payload: updatedEventJSON,
-	})
-	if err != nil {
-		fmt.Println("Failed to marshal updated event:", err)
-		return
-	}
-
-	c.hub.rooms[c.room].broadcast <- message
-
-	usersJSON, err := json.Marshal(users)
-	if err != nil {
-		fmt.Println("Failed to marshal users:", err)
-		return
-	}
-
-	usersMessage, err := json.Marshal(Message{
-		Type:    "users",
-		Payload: usersJSON,
-	})
-	if err != nil {
-		fmt.Println("Failed to marshal updated event:", err)
-		return
-	}
-
-	c.hub.rooms[c.room].broadcast <- usersMessage
+	c.refreshEvent()
+	c.refreshUsers(event.ID)
 }
 
-func (c *Client) handleCreateExpense(payload json.RawMessage) {
+func (c *Client) createExpense(payload json.RawMessage) {
 	var input types.CreateExpenseInput
 	if err := json.Unmarshal(payload, &input); err != nil {
 		fmt.Println("Failed to unmarshal data:", err)
@@ -193,10 +156,10 @@ func (c *Client) handleCreateExpense(payload json.RawMessage) {
 
 	err = firebase.SendNotification(usersTokens, notification)
 
-	c.refreshExpenses()
+	c.refreshEventData()
 }
 
-func (c *Client) handleUpdateExpense(payload json.RawMessage) {
+func (c *Client) updateExpense(payload json.RawMessage) {
 	var input types.UpdateExpenseInput
 	if err := json.Unmarshal(payload, &input); err != nil {
 		fmt.Println("Failed to unmarshal data:", err)
@@ -209,10 +172,10 @@ func (c *Client) handleUpdateExpense(payload json.RawMessage) {
 		return
 	}
 
-	c.refreshExpenses()
+	c.refreshEventData()
 }
 
-func (c *Client) handleDeleteExpense(payload json.RawMessage) {
+func (c *Client) deleteExpense(payload json.RawMessage) {
 	var input DeleteExpenseInput
 	if err := json.Unmarshal(payload, &input); err != nil {
 		fmt.Println("Failed to unmarshal data:", err)
@@ -225,10 +188,10 @@ func (c *Client) handleDeleteExpense(payload json.RawMessage) {
 		return
 	}
 
-	c.refreshExpenses()
+	c.refreshEventData()
 }
 
-func (c *Client) handleCreateRefund(payload json.RawMessage) {
+func (c *Client) createRefund(payload json.RawMessage) {
 	var input types.CreateRefundInput
 	if err := json.Unmarshal(payload, &input); err != nil {
 		fmt.Println("Failed to unmarshal data:", err)
@@ -273,10 +236,10 @@ func (c *Client) handleCreateRefund(payload json.RawMessage) {
 
 	_ = firebase.SendNotification(usersTokens, notification)
 
-	c.refreshExpenses()
+	c.refreshEventData()
 }
 
-func (c *Client) handleUpdateRefund(payload json.RawMessage) {
+func (c *Client) updateRefund(payload json.RawMessage) {
 	var input types.UpdateRefundInput
 	if err := json.Unmarshal(payload, &input); err != nil {
 		fmt.Println("Failed to unmarshal data:", err)
@@ -289,11 +252,10 @@ func (c *Client) handleUpdateRefund(payload json.RawMessage) {
 		return
 	}
 
-	c.refreshExpenses()
-
+	c.refreshEventData()
 }
 
-func (c *Client) handleDeleteRefund(payload json.RawMessage) {
+func (c *Client) deleteRefund(payload json.RawMessage) {
 	var input DeleteRefundInput
 	if err := json.Unmarshal(payload, &input); err != nil {
 		fmt.Println("Failed to unmarshal data:", err)
@@ -306,17 +268,57 @@ func (c *Client) handleDeleteRefund(payload json.RawMessage) {
 		return
 	}
 
-	c.refreshExpenses()
+	c.refreshEventData()
 }
 
-func (c *Client) refreshExpenses() {
+func (c *Client) refreshEvent() {
 	eventId, err := strconv.ParseUint(c.room, 10, 32)
 	if err != nil {
 		fmt.Println("Invalid eventId:", err)
 		return
 	}
 
-	expenses, err := c.hub.expenseService.FindByEventId(uint(eventId))
+	event, err := c.hub.eventService.FindOne(uint(eventId))
+	if err != nil {
+		fmt.Println("Failed to get event:", err)
+		return
+	}
+
+	eventJSON, err := json.Marshal(event)
+	if err != nil {
+		fmt.Println("Failed to marshal event:", err)
+		return
+	}
+
+	message, err := json.Marshal(Message{
+		Type:    "event",
+		Payload: eventJSON,
+	})
+	if err != nil {
+		fmt.Println("Failed to marshal event message:", err)
+		return
+	}
+
+	c.hub.rooms[c.room].broadcast <- message
+
+}
+
+func (c *Client) refreshEventData() {
+	eventId, err := strconv.ParseUint(c.room, 10, 32)
+	if err != nil {
+		fmt.Println("Invalid eventId:", err)
+		return
+	}
+
+	c.refreshExpenses(uint(eventId))
+	c.refreshRefunds(uint(eventId))
+	c.refreshBalances(uint(eventId))
+	c.refreshTransactions(uint(eventId))
+	c.refreshUsers(uint(eventId))
+}
+
+func (c *Client) refreshExpenses(eventId uint) {
+	expenses, err := c.hub.expenseService.FindByEventId(eventId)
 	if err != nil {
 		fmt.Println("Failed to get expenses:", err)
 		return
@@ -337,20 +339,36 @@ func (c *Client) refreshExpenses() {
 		return
 	}
 
-	event, err := c.hub.eventService.FindOne(uint(eventId))
+	c.hub.rooms[c.room].broadcast <- message
+}
+
+func (c *Client) refreshRefunds(eventId uint) {
+	refunds, err := c.hub.refundService.FindByEventId(eventId)
 	if err != nil {
-		fmt.Println("Failed to get event:", err)
+		fmt.Println("Failed to get refunds:", err)
+		return
+	}
+
+	refundsJSON, err := json.Marshal(refunds)
+	if err != nil {
+		fmt.Println("Failed to marshal refunds:", err)
+		return
+	}
+
+	message, err := json.Marshal(Message{
+		Type:    "refunds",
+		Payload: refundsJSON,
+	})
+	if err != nil {
+		fmt.Println("Failed to marshal refunds message:", err)
 		return
 	}
 
 	c.hub.rooms[c.room].broadcast <- message
-	c.refreshBalances(event)
-	c.refreshTransactions(event)
-	c.refreshUsers(event)
 }
 
-func (c *Client) refreshBalances(event models.Event) {
-	balances, err := c.hub.eventService.GetBalances(event)
+func (c *Client) refreshBalances(eventId uint) {
+	balances, err := c.hub.eventService.GetBalances(eventId)
 	if err != nil {
 		fmt.Println("Failed to get balances:", err)
 		return
@@ -374,8 +392,8 @@ func (c *Client) refreshBalances(event models.Event) {
 	c.hub.rooms[c.room].broadcast <- message
 }
 
-func (c *Client) refreshTransactions(event models.Event) {
-	transactions, err := c.hub.eventService.GetTransactions(event)
+func (c *Client) refreshTransactions(eventId uint) {
+	transactions, err := c.hub.eventService.GetTransactions(eventId)
 	if err != nil {
 		fmt.Println("Failed to create transactions:", err)
 		return
@@ -399,8 +417,8 @@ func (c *Client) refreshTransactions(event models.Event) {
 	c.hub.rooms[c.room].broadcast <- message
 }
 
-func (c *Client) refreshUsers(event models.Event) {
-	users, err := c.hub.eventService.GetUsersWithExpenses(event.ID)
+func (c *Client) refreshUsers(eventId uint) {
+	users, err := c.hub.eventService.GetUsersWithExpenses(eventId)
 	if err != nil {
 		fmt.Println("Failed to get users:", err)
 		return

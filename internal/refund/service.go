@@ -42,6 +42,15 @@ func (service *Service) FindOne(id uint) (models.Refund, error) {
 	return refund, nil
 }
 
+func (service *Service) FindByEventId(eventId uint) ([]models.Refund, error) {
+	refunds, err := service.Repository.FindByEventId(eventId)
+	if err != nil {
+		return nil, err
+	}
+
+	return refunds, nil
+}
+
 func (service *Service) Create(input types.CreateRefundInput, user models.User, eventId uint) (models.Refund, error) {
 	fromUser, err := service.UserRepository.FindOneById(input.FromUserID)
 	if err != nil {
