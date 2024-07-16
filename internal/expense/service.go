@@ -73,6 +73,7 @@ func (service *Service) Create(input types.CreateExpenseInput, user models2.User
 		Amount:      input.Amount,
 		AuthorID:    user.ID,
 		EventID:     input.Event,
+		Date:        input.Date,
 	}
 
 	participants, err := service.handleParticipants(input.Participants, expense)
@@ -145,6 +146,10 @@ func (service *Service) Update(id uint, input types.UpdateExpenseInput) (models2
 
 	if input.Amount != 0 {
 		expense.Amount = input.Amount
+	}
+
+	if !input.Date.IsZero() {
+		expense.Date = input.Date
 	}
 
 	if input.Participants != nil {
