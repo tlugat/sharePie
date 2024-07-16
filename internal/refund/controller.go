@@ -1,6 +1,7 @@
 package refund
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"sharePie-api/internal/types"
@@ -27,7 +28,7 @@ func NewController(service types.IRefundService) *Controller {
 func (controller *Controller) FindRefunds(c *gin.Context) {
 	refunds, err := controller.refundService.Find()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to retrieve refunds: %v", err)})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": refunds})
@@ -47,7 +48,7 @@ func (controller *Controller) FindRefund(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	refund, err := controller.refundService.FindOne(uint(id))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Refund with ID %d not found", id)})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": refund})
@@ -60,13 +61,13 @@ func (controller *Controller) FindRefund(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path int true "Refund ID"
-// @Success 200 {object} map[string]interface{} "Confirms successful deletion"
-// @Failure 400 {object} map[string]interface{} "Returns an error if the refund cannot be deleted"
+// @Success 200 {object} map[string.interface{} "Confirms successful deletion"
+// @Failure 400 {object} map[string.interface{} "Returns an error if the refund cannot be deleted"
 // @Router /refunds/{id} [delete]
 func (controller *Controller) DeleteRefund(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	if err := controller.refundService.Delete(uint(id)); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to delete refund"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Failed to delete refund with ID %d: %v", id, err)})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": true})

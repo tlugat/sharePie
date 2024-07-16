@@ -1,6 +1,7 @@
 package category
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"sharePie-api/internal/types"
@@ -27,7 +28,7 @@ func NewController(service types.ICategoryService) *Controller {
 func (controller *Controller) FindCategories(c *gin.Context) {
 	categories, err := controller.categoryService.Find()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to retrieve categories: %v", err)})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": categories})
@@ -41,13 +42,13 @@ func (controller *Controller) FindCategories(c *gin.Context) {
 // @Produce  json
 // @Param id path int true "Category ID"
 // @Success 200 {object} map[string]interface{} "Returns the specified category"
-// @Failure 400 {object} map[string]interface{} "Returns an error if the category is not found"
+// @Failure 400 {object} map[string.interface{} "Returns an error if the category is not found"
 // @Router /categories/{id} [get]
 func (controller *Controller) FindCategory(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	category, err := controller.categoryService.FindOne(uint(id))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Category with ID %d not found", id)})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": category})
@@ -60,18 +61,18 @@ func (controller *Controller) FindCategory(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param input body types.CreateCategoryInput true "Category creation data"
-// @Success 200 {object} map[string]interface{} "Returns the newly created category"
-// @Failure 400 {object} map[string]interface{} "Returns an error if the input is invalid"
+// @Success 200 {object} map[string.interface{} "Returns the newly created category"
+// @Failure 400 {object} map[string.interface{} "Returns an error if the input is invalid"
 // @Router /categories [post]
 func (controller *Controller) CreateCategory(c *gin.Context) {
 	var input types.CreateCategoryInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Invalid input: %v", err)})
 		return
 	}
 	category, err := controller.categoryService.Create(input)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to create category: %v", err)})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": category})
@@ -85,19 +86,19 @@ func (controller *Controller) CreateCategory(c *gin.Context) {
 // @Produce  json
 // @Param id path int true "Category ID"
 // @Param input body types.UpdateCategoryInput true "Category update data"
-// @Success 200 {object} map[string]interface{} "Returns the updated category"
-// @Failure 400 {object} map[string]interface{} "Returns an error if the input is invalid or the category does not exist"
+// @Success 200 {object} map[string.interface{} "Returns the updated category"
+// @Failure 400 {object} map[string.interface{} "Returns an error if the input is invalid or the category does not exist"
 // @Router /categories/{id} [put]
 func (controller *Controller) UpdateCategory(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	var input types.UpdateCategoryInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Invalid input: %v", err)})
 		return
 	}
 	category, err := controller.categoryService.Update(uint(id), input)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to update category with ID %d: %v", id, err)})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": category})
@@ -110,13 +111,13 @@ func (controller *Controller) UpdateCategory(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path int true "Category ID"
-// @Success 200 {object} map[string]interface{} "Confirms successful deletion"
-// @Failure 400 {object} map[string]interface{} "Returns an error if the category cannot be deleted"
+// @Success 200 {object} map[string.interface{} "Confirms successful deletion"
+// @Failure 400 {object} map[string.interface{} "Returns an error if the category cannot be deleted"
 // @Router /categories/{id} [delete]
 func (controller *Controller) DeleteCategory(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	if err := controller.categoryService.Delete(uint(id)); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to delete category"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Failed to delete category with ID %d: %v", id, err)})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": true})

@@ -1,6 +1,7 @@
 package achievement
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"sharePie-api/internal/types"
@@ -27,7 +28,7 @@ func NewController(service types.IAchievementService) *Controller {
 func (controller *Controller) FindAchievements(c *gin.Context) {
 	achievements, err := controller.achievementService.Find()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to retrieve achievements: %v", err)})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": achievements})
@@ -40,14 +41,14 @@ func (controller *Controller) FindAchievements(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path int true "Achievement ID"
-// @Success 200 {object} map[string]interface{} "Returns the specified achievement"
-// @Failure 400 {object} map[string]interface{} "Returns an error if the achievement is not found"
+// @Success 200 {object} map[string.interface{} "Returns the specified achievement"
+// @Failure 400 {object} map[string.interface{} "Returns an error if the achievement is not found"
 // @Router /achievements/{id} [get]
 func (controller *Controller) FindAchievement(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	achievement, err := controller.achievementService.FindOne(uint(id))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Achievement with ID %d not found", id)})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": achievement})
@@ -60,19 +61,19 @@ func (controller *Controller) FindAchievement(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param input body types.CreateAchievementInput true "Achievement creation data"
-// @Success 200 {object} map[string]interface{} "Returns the newly created achievement"
-// @Failure 400 {object} map[string]interface{} "Returns an error if the input is invalid or user authentication fails"
+// @Success 200 {object} map[string.interface{} "Returns the newly created achievement"
+// @Failure 400 {object} map[string.interface{} "Returns an error if the input is invalid or user authentication fails"
 // @Router /achievements [post]
 func (controller *Controller) CreateAchievement(c *gin.Context) {
 	var input types.CreateAchievementInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Invalid input: %v", err)})
 		return
 	}
 
 	achievement, err := controller.achievementService.Create(input)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to create achievement: %v", err)})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": achievement})
@@ -86,19 +87,19 @@ func (controller *Controller) CreateAchievement(c *gin.Context) {
 // @Produce  json
 // @Param id path int true "Achievement ID"
 // @Param input body types.UpdateAchievementInput true "Achievement update data"
-// @Success 200 {object} map[string]interface{} "Returns the updated achievement"
-// @Failure 400 {object} map[string]interface{} "Returns an error if the input is invalid or the achievement does not exist"
+// @Success 200 {object} map[string.interface{} "Returns the updated achievement"
+// @Failure 400 {object} map[string.interface{} "Returns an error if the input is invalid or the achievement does not exist"
 // @Router /achievements/{id} [patch]
 func (controller *Controller) UpdateAchievement(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	var input types.UpdateAchievementInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Invalid input: %v", err)})
 		return
 	}
 	achievement, err := controller.achievementService.Update(uint(id), input)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to update achievement with ID %d: %v", id, err)})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": achievement})
@@ -111,13 +112,13 @@ func (controller *Controller) UpdateAchievement(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path int true "Achievement ID"
-// @Success 200 {object} map[string]interface{} "Confirms successful deletion"
-// @Failure 400 {object} map[string]interface{} "Returns an error if the achievement cannot be deleted"
+// @Success 200 {object} map[string.interface{} "Confirms successful deletion"
+// @Failure 400 {object} map[string.interface{} "Returns an error if the achievement cannot be deleted"
 // @Router /achievements/{id} [delete]
 func (controller *Controller) DeleteAchievement(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	if err := controller.achievementService.Delete(uint(id)); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to delete achievement"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Failed to delete achievement with ID %d: %v", id, err)})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": true})

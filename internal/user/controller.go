@@ -1,6 +1,7 @@
 package user
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"sharePie-api/internal/auth"
@@ -28,7 +29,7 @@ func NewController(service types.IUserService) *Controller {
 func (controller *Controller) FindUsers(c *gin.Context) {
 	users, err := controller.userService.Find()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to retrieve users: %v", err)})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": users})
@@ -48,7 +49,7 @@ func (controller *Controller) FindUser(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	user, err := controller.userService.FindOneById(uint(id))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "User not found!"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("User with ID %d not found", id)})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": user})
@@ -61,18 +62,18 @@ func (controller *Controller) FindUser(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param input body types.CreateUserInput true "User creation data"
-// @Success 201 {object} map[string]interface{} "Returns the created user"
-// @Failure 400 {object} map[string]interface{} "Returns an error if the input is invalid"
+// @Success 201 {object} map[string.interface{} "Returns the created user"
+// @Failure 400 {object} map[string.interface{} "Returns an error if the input is invalid"
 // @Router /users [post]
 func (controller *Controller) CreateUser(c *gin.Context) {
 	var input types.CreateUserInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Invalid input: %v", err)})
 		return
 	}
 	user, err := controller.userService.Create(input)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to create user: %v", err)})
 		return
 	}
 	c.JSON(http.StatusCreated, gin.H{"data": user})
@@ -86,19 +87,19 @@ func (controller *Controller) CreateUser(c *gin.Context) {
 // @Produce  json
 // @Param id path int true "User ID"
 // @Param input body types.UpdateUserInput true "User update data"
-// @Success 200 {object} map[string]interface{} "Returns the updated user"
-// @Failure 400 {object} map[string]interface{} "Returns an error if the input is invalid or the user does not exist"
+// @Success 200 {object} map[string.interface{} "Returns the updated user"
+// @Failure 400 {object} map[string.interface{} "Returns an error if the input is invalid or the user does not exist"
 // @Router /users/{id} [patch]
 func (controller *Controller) UpdateUser(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	var input types.UpdateUserInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Invalid input: %v", err)})
 		return
 	}
 	user, err := controller.userService.Update(uint(id), input)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to update user with ID %d: %v", id, err)})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": user})
@@ -112,22 +113,23 @@ func (controller *Controller) UpdateUser(c *gin.Context) {
 // @Produce  json
 // @Param id path int true "User ID"
 // @Param input body types.UpdateUserInput true "User update data"
-// @Success 200 {object} map[string]interface{} "Returns the updated user"
-// @Failure 400 {object} map[string]interface{} "Returns an error if the input is invalid or the user does not exist"
+// @Success 200 {object} map[string.interface{} "Returns the updated user"
+// @Failure 400 {object} map[string.interface{} "Returns an error if the input is invalid or the user does not exist"
 // @Router /users/me [patch]
 func (controller *Controller) UpdateCurrentUser(c *gin.Context) {
 	contextUser, ok := auth.GetUserFromContext(c)
 	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authorized"})
 		return
 	}
 	var input types.UpdateUserInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Invalid input: %v", err)})
 		return
 	}
 	user, err := controller.userService.Update(contextUser.ID, input)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to update current user: %v", err)})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": user})
@@ -141,22 +143,23 @@ func (controller *Controller) UpdateCurrentUser(c *gin.Context) {
 // @Produce  json
 // @Param id path int true "User ID"
 // @Param input body types.UpdateUserFirebaseTokenInput true "User update data"
-// @Success 200 {object} map[string]interface{} "Returns the updated user"
-// @Failure 400 {object} map[string]interface{} "Returns an error if the input is invalid or the user does not exist"
+// @Success 200 {object} map[string.interface{} "Returns the updated user"
+// @Failure 400 {object} map[string.interface{} "Returns an error if the input is invalid or the user does not exist"
 // @Router /users/firebase_token [patch]
 func (controller *Controller) UpdateCurrentUserFirebaseToken(c *gin.Context) {
 	contextUser, ok := auth.GetUserFromContext(c)
 	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authorized"})
 		return
 	}
 	var input types.UpdateUserFirebaseTokenInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Invalid input: %v", err)})
 		return
 	}
 	user, err := controller.userService.UpdateFirebaseToken(contextUser.ID, input)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to update Firebase token for user with ID %d: %v", contextUser.ID, err)})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": user})
@@ -169,13 +172,13 @@ func (controller *Controller) UpdateCurrentUserFirebaseToken(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path int true "User ID"
-// @Success 200 {object} map[string]interface{} "Confirms successful deletion"
-// @Failure 400 {object} map[string]interface{} "Returns an error if the user cannot be deleted"
+// @Success 200 {object} map[string.interface{} "Confirms successful deletion"
+// @Failure 400 {object} map[string.interface{} "Returns an error if the user cannot be deleted"
 // @Router /users/{id} [delete]
 func (controller *Controller) DeleteUser(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	if err := controller.userService.Delete(uint(id)); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to delete user"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Failed to delete user with ID %d: %v", id, err)})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": true})
@@ -187,18 +190,19 @@ func (controller *Controller) DeleteUser(c *gin.Context) {
 // @Tags Users
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} map[string]interface{} "Returns the user from the token"
-// @Failure 401 {object} map[string]interface{} "Returns an error if the user cannot be retrieved"
+// @Success 200 {object} map[string.interface{} "Returns the user from the token"
+// @Failure 401 {object} map[string.interface{} "Returns an error if the user cannot be retrieved"
 // @Router /users/me [get]
 func (controller *Controller) GetUserFromToken(c *gin.Context) {
 	contextUser, ok := auth.GetUserFromContext(c)
 	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authorized"})
 		return
 	}
 
 	user, err := controller.userService.FindOneById(contextUser.ID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "User not found!"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("User with ID %d not found", contextUser.ID)})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": user})
