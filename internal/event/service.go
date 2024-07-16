@@ -277,7 +277,7 @@ func (service *Service) AddUser(code string, user models2.User) (models2.Event, 
 func (service *Service) GetBalances(eventId uint) ([]models2.Balance, error) {
 	balances, err := service.Repository.FindBalances(eventId)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("failed to find balances for event with id %d: %v", event.ID, err))
+		return nil, errors.New(fmt.Sprintf("failed to find balances for event with id %d: %v", eventId, err))
 	}
 	return balances, nil
 }
@@ -285,7 +285,7 @@ func (service *Service) GetBalances(eventId uint) ([]models2.Balance, error) {
 func (service *Service) GetTransactions(eventId uint) ([]models2.Transaction, error) {
 	transactions, err := service.Repository.FindTransactions(eventId)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("failed to find transactions for event with id %d: %v", event.ID, err))
+		return nil, errors.New(fmt.Sprintf("failed to find transactions for event with id %d: %v", eventId, err))
 	}
 	return transactions, nil
 }
