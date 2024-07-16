@@ -1,6 +1,9 @@
 package types
 
-import "sharePie-api/internal/models"
+import (
+	"sharePie-api/internal/models"
+	"time"
+)
 
 type IExpenseRepository interface {
 	Find() ([]models.Expense, error)
@@ -40,6 +43,7 @@ type CreateExpenseInput struct {
 	Event        uint               `json:"event" binding:"required"`
 	Participants []ParticipantInput `json:"participants" binding:"required"`
 	Payers       []PayerInput       `json:"payers" binding:"required"`
+	Date         time.Time          `json:"date" time_format:"2006-01-02T15:04:05Z07:00" binding:"required"`
 }
 
 type UpdateExpenseInput struct {
@@ -51,4 +55,5 @@ type UpdateExpenseInput struct {
 	Payers       []PayerInput       `json:"payers"`
 	Amount       float64            `json:"amount"`
 	ID           uint               `json:"id"`
+	Date         time.Time          `json:"date" time_format:"2006-01-02T15:04:05Z07:00"`
 }

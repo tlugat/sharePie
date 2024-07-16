@@ -2,6 +2,7 @@ package models
 
 import (
 	"gorm.io/gorm"
+	"time"
 )
 
 type Expense struct {
@@ -17,4 +18,5 @@ type Expense struct {
 	Participants []Participant `json:"participants" gorm:"foreignKey:ExpenseID"`
 	Amount       float64       `json:"amount"`
 	EventID      uint          `json:"eventId"`
+	Date         time.Time     `json:"date" time_format:"2006-01-02T15:04:05Z07:00"`
 }
