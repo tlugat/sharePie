@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
@@ -38,7 +39,7 @@ func NewController(service types.IUserService) *Controller {
 func (controller *Controller) Signup(c *gin.Context) {
 	var input types.CreateUserInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Invalid input: %v", err)})
 		return
 	}
 	hash, err := bcrypt.GenerateFromPassword([]byte(input.Password), 10)
@@ -48,9 +49,8 @@ func (controller *Controller) Signup(c *gin.Context) {
 	}
 	input.Password = string(hash)
 	user, err := controller.userService.Create(input)
-
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to create user: %v", err)})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": user})
@@ -63,34 +63,28 @@ func (controller *Controller) Signup(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param input body LoginInput true "Login credentials"
-// @Success 200 {object} map[string]interface{} "Returns a JWT token"
-// @Failure 400 {object} map[string]interface{} "Returns an error if the login credentials are invalid"
+// @Success 200 {object} map[string.interface{} "Returns a JWT token"
+// @Failure 400 {object} map[string.interface{} "Returns an error if the login credentials are invalid"
 // @Router /auth/login [post]
 func (controller *Controller) Login(c *gin.Context) {
 	var input LoginInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Invalid input: %v", err)})
 		return
 	}
 
 	input.Email = strings.ToLower(input.Email)
 
 	user, err := controller.userService.FindOneByEmail(input.Email)
-
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid email or password",
-		})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid email or password"})
 		return
 	}
 
 	// Compare sent in password with saved users password
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password))
-
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid email or password",
-		})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid email or password"})
 		return
 	}
 
@@ -102,11 +96,8 @@ func (controller *Controller) Login(c *gin.Context) {
 
 	// Sign and get the complete encoded token as a string using the secret
 	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
-
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Failed to create token",
-		})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to create token"})
 		return
 	}
 
@@ -119,17 +110,10 @@ func (controller *Controller) Login(c *gin.Context) {
 // @Tags Auth
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} map[string]interface{} "Returns the current user"
+// @Success 200 {object} map[string.interface{} "Returns the current user"
 // @Router /auth/validate [get]
 func (controller *Controller) Validate(c *gin.Context) {
 	user, _ := c.Get("user")
 
-	//if !exists {
-	//	c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-	//	return
-	//}
-
-	c.JSON(http.StatusOK, gin.H{
-		"user": user,
-	})
+	c.JSON(http.StatusOK, gin.H{"user": user})
 }

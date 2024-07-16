@@ -1,6 +1,7 @@
 package expense
 
 import (
+	"fmt"
 	"net/http"
 	"sharePie-api/internal/auth"
 	"sharePie-api/internal/types"
@@ -29,7 +30,7 @@ func NewController(service types.IExpenseService) *Controller {
 func (controller *Controller) FindExpenses(c *gin.Context) {
 	expenses, err := controller.expenseService.Find()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to retrieve expenses: %v", err)})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": expenses})
@@ -49,7 +50,7 @@ func (controller *Controller) FindExpense(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	expense, err := controller.expenseService.FindOne(uint(id))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Expense with ID %d not found", id)})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": expense})
@@ -68,19 +69,19 @@ func (controller *Controller) FindExpense(c *gin.Context) {
 func (controller *Controller) CreateExpense(c *gin.Context) {
 	var input types.CreateExpenseInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Invalid input: %v", err)})
 		return
 	}
 
 	user, ok := auth.GetUserFromContext(c)
-
 	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authorized"})
 		return
 	}
 
 	expense, err := controller.expenseService.Create(input, user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to create expense: %v", err)})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": expense})
@@ -101,12 +102,12 @@ func (controller *Controller) UpdateExpense(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	var input types.UpdateExpenseInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Invalid input: %v", err)})
 		return
 	}
 	expense, err := controller.expenseService.Update(uint(id), input)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to update expense with ID %d: %v", id, err)})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": expense})
@@ -125,7 +126,7 @@ func (controller *Controller) UpdateExpense(c *gin.Context) {
 func (controller *Controller) DeleteExpense(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	if err := controller.expenseService.Delete(uint(id)); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to delete expense"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Failed to delete expense with ID %d: %v", id, err)})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": true})

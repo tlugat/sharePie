@@ -2,6 +2,7 @@ package event
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"sharePie-api/internal/auth"
 	"sharePie-api/internal/types"
@@ -31,14 +32,14 @@ func NewController(service types.IEventService) *Controller {
 func (controller *Controller) FindEvents(c *gin.Context) {
 	user, ok := auth.GetUserFromContext(c)
 	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "user not found"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "User not found in context"})
 		return
 	}
 
 	if user.Role == utils.AdminRole {
 		events, err := controller.eventService.Find()
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to retrieve events: %v", err)})
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{"data": events})
@@ -47,11 +48,10 @@ func (controller *Controller) FindEvents(c *gin.Context) {
 
 	events, err := controller.eventService.FindByUser(user.ID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to retrieve events for user with ID %d: %v", user.ID, err)})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": events})
-
 }
 
 // FindEvent retrieves an event by ID.
@@ -68,7 +68,7 @@ func (controller *Controller) FindEvent(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	event, err := controller.eventService.FindOne(uint(id))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Event with ID %d not found", id)})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": event})
@@ -87,19 +87,19 @@ func (controller *Controller) FindEvent(c *gin.Context) {
 func (controller *Controller) CreateEvent(c *gin.Context) {
 	var input types.CreateEventInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Invalid input: %v", err)})
 		return
 	}
 
 	user, ok := auth.GetUserFromContext(c)
-
 	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authorized"})
 		return
 	}
 
 	event, err := controller.eventService.Create(input, user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to create event: %v", err)})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": event})
@@ -120,12 +120,12 @@ func (controller *Controller) UpdateEvent(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	var input types.UpdateEventInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Invalid input: %v", err)})
 		return
 	}
 	event, err := controller.eventService.Update(uint(id), input)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to update event with ID %d: %v", id, err)})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": event})
@@ -146,12 +146,12 @@ func (controller *Controller) UpdateEventState(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	var input types.UpdateEventStateInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Invalid input: %v", err)})
 		return
 	}
 	event, err := controller.eventService.UpdateState(uint(id), input)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to update event state for event with ID %d: %v", id, err)})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": event})
@@ -170,7 +170,7 @@ func (controller *Controller) UpdateEventState(c *gin.Context) {
 func (controller *Controller) DeleteEvent(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	if err := controller.eventService.Delete(uint(id)); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to delete event"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Failed to delete event with ID %d: %v", id, err)})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": true})
@@ -189,12 +189,10 @@ func (controller *Controller) DeleteEvent(c *gin.Context) {
 func (controller *Controller) GetEventUsers(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	users, err := controller.eventService.GetUsers(uint(id))
-
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Event not found!"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Failed to retrieve users for event with ID %d: %v", id, err)})
 		return
 	}
-
 	c.JSON(http.StatusOK, gin.H{"data": users})
 }
 
@@ -212,8 +210,15 @@ func (controller *Controller) GetEventBalances(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	balanceSummary, err := controller.eventService.GetBalances(uint(id))
 
+	event, err := controller.eventService.FindOne(uint(id))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Event with ID %d not found", id)})
+		return
+	}
+
+	balanceSummary, err := controller.eventService.GetBalances(event)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to retrieve balance summary for event with ID %d: %v", id, err)})
 		return
 	}
 
@@ -235,8 +240,15 @@ func (controller *Controller) GetEventTransactions(c *gin.Context) {
 
 	transactions, err := controller.eventService.GetTransactions(uint(id))
 
+	event, err := controller.eventService.FindOne(uint(id))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Event with ID %d not found", id)})
+		return
+	}
+
+	transactions, err := controller.eventService.GetTransactions(event)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to retrieve transactions for event with ID %d: %v", id, err)})
 		return
 	}
 
@@ -257,13 +269,13 @@ func (controller *Controller) GetEventTransactions(c *gin.Context) {
 func (controller *Controller) JoinEvent(c *gin.Context) {
 	var input types.JoinEventInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Invalid input: %v", err)})
 		return
 	}
 
 	user, ok := auth.GetUserFromContext(c)
 	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authorized"})
 		return
 	}
 
@@ -273,7 +285,7 @@ func (controller *Controller) JoinEvent(c *gin.Context) {
 		if errors.As(err, &conflictErr) {
 			c.JSON(http.StatusConflict, gin.H{"error": conflictErr.Error()})
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to join event: %v", err)})
 		}
 		return
 	}
@@ -294,12 +306,11 @@ func (controller *Controller) JoinEvent(c *gin.Context) {
 func (controller *Controller) GetExpenses(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 
-	expense, err := controller.eventService.FindExpenses(uint(id))
-
+	expenses, err := controller.eventService.FindExpenses(uint(id))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to retrieve expenses for event with ID %d: %v", id, err)})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": expense})
+	c.JSON(http.StatusOK, gin.H{"data": expenses})
 }
