@@ -3,7 +3,6 @@ package expense
 import (
 	"errors"
 	"fmt"
-	"sharePie-api/internal/auth/middleware"
 	models2 "sharePie-api/internal/models"
 	"sharePie-api/internal/participant"
 	"sharePie-api/internal/payer"
@@ -103,10 +102,6 @@ func (service *Service) Create(input types.CreateExpenseInput, user models2.User
 	event, err := service.EventService.FindOne(input.Event)
 	if err != nil {
 		return models2.Expense{}, errors.New(fmt.Sprintf("failed to find event with id %d: %v", input.Event, err))
-	}
-
-	if !middleware.IsUserPartOfEvent(user, event) {
-		return models2.Expense{}, errors.New("user is not part of the event")
 	}
 
 	balances, err := service.EventService.CreateBalances(event)
