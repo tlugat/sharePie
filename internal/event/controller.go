@@ -8,6 +8,7 @@ import (
 	"sharePie-api/internal/types"
 	"sharePie-api/pkg/utils"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -279,7 +280,7 @@ func (controller *Controller) JoinEvent(c *gin.Context) {
 		return
 	}
 
-	event, err := controller.eventService.AddUser(input.Code, user)
+	event, err := controller.eventService.AddUser(strings.ToUpper(input.Code), user)
 	if err != nil {
 		var conflictErr *types.ConflictError
 		if errors.As(err, &conflictErr) {
