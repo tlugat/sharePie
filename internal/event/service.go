@@ -3,7 +3,6 @@ package event
 import (
 	"errors"
 	"fmt"
-	"log"
 	"math/rand"
 	models2 "sharePie-api/internal/models"
 	"sharePie-api/internal/types"
@@ -243,7 +242,7 @@ func (service *Service) AddUser(code string, user models2.User) (models2.Event, 
 	}
 
 	if isUserAlreadyInEvent {
-		return models2.Event{}, types.NewConflictError("user is already in the event")
+		return models2.Event{}, errors.New("user is already in the event")
 	}
 
 	event.Users = append(users, user)
@@ -265,11 +264,7 @@ func (service *Service) AddUser(code string, user models2.User) (models2.Event, 
 		}
 	}
 
-	err = firebase.SendNotification(usersTokens, notification)
-	if err != nil {
-		log.Println("Failed to send notification:", err)
-		return models2.Event{}, errors.New("failed to send notification")
-	}
+	_ = firebase.SendNotification(usersTokens, notification)
 
 	return event, nil
 }
